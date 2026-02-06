@@ -510,9 +510,9 @@ This project is licensed under the MIT License.
 ## 👤 Author
 
 **Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [Your Name](https://linkedin.com/in/yourprofile)
-- Portfolio: [yourportfolio.com](https://yourportfolio.com)
+- GitHub: [@yourusername](https://github.com/enyasystem)
+- LinkedIn: [Your Name](https://linkedin.com/in/enyaelvis)
+- Portfolio: [yourportfolio.com](https://enyaelvis.vercel.app)
 
 ## 🙏 Acknowledgments
 
