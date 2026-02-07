@@ -4,7 +4,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ProductList from './src/screens/ProductList.tsx';
 import ProductDetails from './src/screens/ProductDetails.tsx';
-import SplashScreen from './src/screens/SplashScreen';
+import SplashScreen from './app/splash';
 import Onboarding1 from './src/screens/Onboarding1';
 import Onboarding2 from './src/screens/Onboarding2';
 import Onboarding3 from './src/screens/Onboarding3';
