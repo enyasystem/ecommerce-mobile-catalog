@@ -13,12 +13,13 @@ function CustomTabBarContent({ state, descriptors, navigation }: any) {
     <View style={[styles.tabBarContainer, { paddingBottom: insets.bottom + 8 }]}>
       <View style={styles.tabBar}>
           {/* Glass blur + subtle gradient overlay for frosted look */}
-          <BlurView intensity={50} tint="dark" style={styles.tabBarBlur} />
+          <BlurView intensity={50} tint="dark" style={styles.tabBarBlur} pointerEvents="none" />
           <LinearGradient
             colors={["rgba(255,255,255,0.02)", "rgba(255,255,255,0.01)"]}
             start={[0, 0]}
             end={[1, 1]}
             style={styles.tabBarGradient}
+            pointerEvents="none"
           />
         <View style={styles.tabsLeft}>
           {state.routes.slice(0, 2).map((route: any, index: number) => {
