@@ -27,7 +27,7 @@ A dynamic e-commerce product catalog mobile application that allows users to bro
 
 **Figma Design:** [Add your Figma link here]
 
-**GitHub Repository:** https://github.com/YOUR_USERNAME/ecommerce-mobile-catalog
+**GitHub Repository:** https://github.com/enyasystem/ecommerce-mobile-catalog
 
 ## ✨ Features
 
@@ -110,7 +110,7 @@ npm install -g eas-cli
 
 2. **Clone the repository**
 ```bash
-git clone https://github.com/YOUR_USERNAME/ecommerce-mobile-catalog.git
+git clone https://github.com/enyasystem/ecommerce-mobile-catalog
 cd ecommerce-mobile-catalog
 ```
 
