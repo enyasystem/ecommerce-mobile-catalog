@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Image } from 'expo-image';
+import { Image } from 'react-native';
 import type { Product } from '../data/products';
 
 type Props = {
@@ -11,7 +11,7 @@ type Props = {
 export default function ProductCard({ product, onPress }: Props) {
   return (
     <TouchableOpacity style={styles.card} onPress={() => onPress?.(product)}>
-      <Image source={product.image} style={styles.image} contentFit="cover" />
+      <Image source={{ uri: product.image }} style={styles.image} />
       <View style={styles.info}>
         <Text style={styles.name}>{product.name}</Text>
         <Text style={styles.price}>${product.price.toFixed(2)}</Text>
