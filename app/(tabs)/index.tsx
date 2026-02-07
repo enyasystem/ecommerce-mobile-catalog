@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
 	View,
 	Text,
@@ -45,6 +45,28 @@ const PRODUCTS = [
 export default function HomeScreen() {
 	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [searchText, setSearchText] = useState('');
+
+	// Flash sale end time (configurable). Default starts at ~04:28:12 from now
+	const FLASH_SALE_END = new Date(Date.now() + (4 * 3600 + 28 * 60 + 12) * 1000);
+	const [remaining, setRemaining] = useState(() => Math.max(0, Math.floor((FLASH_SALE_END.getTime() - Date.now()) / 1000)));
+
+	useEffect(() => {
+		const tick = () => {
+			const secs = Math.max(0, Math.floor((FLASH_SALE_END.getTime() - Date.now()) / 1000));
+			setRemaining(secs);
+		};
+		tick();
+		const id = setInterval(tick, 1000);
+		return () => clearInterval(id);
+	}, []);
+
+	const formatHHMMSS = (totalSeconds: number) => {
+		const hrs = Math.floor(totalSeconds / 3600);
+		const mins = Math.floor((totalSeconds % 3600) / 60);
+		const secs = totalSeconds % 60;
+		const p = (n: number) => String(n).padStart(2, '0');
+		return `${p(hrs)}:${p(mins)}:${p(secs)}`;
+	};
 
 	return (
 		<ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -132,7 +154,7 @@ export default function HomeScreen() {
 					<MaterialCommunityIcons name="lightning-bolt" size={16} color="#f59e0b" />
 					<Text style={styles.flashText}>FLASH SALE</Text>
 				</View>
-				<Text style={styles.flashTime}>04:28:12</Text>
+				<Text style={styles.flashTime}>{formatHHMMSS(remaining)}</Text>
 			</View>
 
 			{/* Brands Section */}
@@ -385,16 +407,17 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		backgroundColor: 'rgba(245, 158, 11, 0.08)',
-		borderRadius: 20,
+		borderRadius: 36,
+		overflow: 'hidden',
 		paddingHorizontal: 20,
 		height: 56,
 		borderWidth: 1,
-		borderColor: 'rgba(255, 255, 255, 0.2)',
+		borderColor: 'rgba(255, 255, 255, 0.12)',
 		shadowColor: '#f59e0b',
-		shadowOffset: { width: 0, height: 4 },
-		shadowOpacity: 0.1,
-		shadowRadius: 8,
-		elevation: 5,
+		shadowOffset: { width: 0, height: 8 },
+		shadowOpacity: 0.18,
+		shadowRadius: 16,
+		elevation: 10,
 	},
 	flashSaleContent: {
 		flexDirection: 'row',
