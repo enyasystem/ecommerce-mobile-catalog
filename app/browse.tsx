@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
 	View,
 	Text,
@@ -9,9 +9,13 @@ import {
 	Image,
 	Dimensions,
 	SafeAreaView,
+	RefreshControl,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import FilterModal from '../components/FilterModal';
+import ProductSkeleton from '../components/products/ProductSkeleton';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 const cardWidth = width / 2 - 16;
@@ -58,13 +62,121 @@ const products = [
 ];
 
 export default function BrowseScreen() {
+	const router = useRouter();
 	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [searchText, setSearchText] = useState('');
+	const [showFilter, setShowFilter] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
+	const [isRefreshing, setIsRefreshing] = useState(false);
+	const [error, setError] = useState<{ type: string; message: string } | null>(null);
+	const [appliedFilters, setAppliedFilters] = useState<{
+		categories: string[];
+		sortBy: string;
+		brands: string[];
+		priceRange: [number, number];
+	}>({
+		categories: ['All'],
+		sortBy: 'popularity',
+		brands: [],
+		priceRange: [50, 1200],
+	});
+
+	// Simulate initial load on mount
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setIsLoading(false);
+		}, 1200);
+		return () => clearTimeout(timer);
+	}, []);
+
+	// Handle pull-to-refresh
+	const onRefresh = async () => {
+		setIsRefreshing(true);
+		setIsLoading(true);
+		setError(null);
+		try {
+			// Simulate API call with a 1 second delay
+			// Uncomment the next line to test error handling
+			// throw new Error('Network error: Failed to fetch products');
+			
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+			console.log('Products refreshed');
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+			setError({
+				type: 'load_error',
+				message: errorMessage,
+			});
+			console.error('Error refreshing products:', err);
+		} finally {
+			setIsRefreshing(false);
+			setIsLoading(false);
+		}
+	};
+
+	// Handle retry
+	const handleRetry = () => {
+		setError(null);
+		onRefresh();
+	};
+
+	// Filter and sort products based on applied filters
+	const filteredProducts = useMemo(() => {
+		let result = [...products];
+
+		// Filter by price range
+		result = result.filter((p) => {
+			const price = p.price;
+			return price >= appliedFilters.priceRange[0] && price <= appliedFilters.priceRange[1];
+		});
+
+		// Filter by search text
+		if (searchText.trim()) {
+			const query = searchText.toLowerCase();
+			result = result.filter((p) =>
+				p.name.toLowerCase().includes(query)
+			);
+		}
+
+		// Sort products
+		switch (appliedFilters.sortBy) {
+			case 'popularity':
+				// Keep default order (already popular items first)
+				break;
+			case 'newest':
+				// Sort with newest (isNew) first
+				result.sort((a, b) => {
+					if (a.isNew === b.isNew) return 0;
+					return a.isNew ? -1 : 1;
+				});
+				break;
+			case 'priceLowHigh':
+				result.sort((a, b) => a.price - b.price);
+				break;
+			case 'priceHighLow':
+				result.sort((a, b) => b.price - a.price);
+				break;
+		}
+
+		return result;
+	}, [appliedFilters, searchText]);
 
 	const renderProductCard = ({ item }: { item: (typeof products)[0] }) => (
 		<TouchableOpacity
 			style={styles.productCard}
 			activeOpacity={0.8}
+			onPress={() => {
+				router.push({
+					pathname: '/product/[id]',
+					params: {
+						id: item.id,
+						name: item.name,
+						price: item.price,
+						image: item.image,
+						originalPrice: item.originalPrice || '',
+					},
+				});
+			}}
 		>
 			{/* Product Image */}
 			<View style={styles.imageContainer}>
@@ -135,30 +247,49 @@ export default function BrowseScreen() {
 				</View>
 
 				{/* Search Bar */}
-				<BlurView intensity={40} style={styles.searchContainer}>
-					<MaterialCommunityIcons
-						name="magnify"
-						size={20}
-						color="rgba(255,255,255,0.5)"
-					/>
-					<TextInput
-						placeholder="Search for premium gear..."
-						placeholderTextColor="rgba(255,255,255,0.4)"
-						style={styles.searchInput}
-						value={searchText}
-						onChangeText={setSearchText}
-					/>
-					<TouchableOpacity style={styles.micButton}>
+				<TouchableOpacity
+					style={{ borderRadius: 16 }}
+					onPress={() => router.push('/(tabs)/search')}
+					activeOpacity={0.7}
+				>
+					<BlurView intensity={40} style={styles.searchContainer}>
 						<MaterialCommunityIcons
-							name="microphone"
-							size={18}
-							color="#fff"
+							name="magnify"
+							size={20}
+							color="rgba(255,255,255,0.5)"
 						/>
-					</TouchableOpacity>
-				</BlurView>
+						<TextInput
+							placeholder="Search for premium gear..."
+							placeholderTextColor="rgba(255,255,255,0.4)"
+							style={styles.searchInput}
+							value={searchText}
+							editable={false}
+							onChangeText={setSearchText}
+						/>
+						<TouchableOpacity style={styles.micButton} onPress={() => router.push('/(tabs)/search')}>
+							<MaterialCommunityIcons
+								name="microphone"
+								size={18}
+								color="#fff"
+							/>
+						</TouchableOpacity>
+					</BlurView>
+				</TouchableOpacity>
 			</View>
 
-			<ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+			<ScrollView 
+				style={styles.scrollContent} 
+				showsVerticalScrollIndicator={false}
+				refreshControl={
+					<RefreshControl
+						refreshing={isRefreshing}
+						onRefresh={onRefresh}
+						tintColor="#2badee"
+						titleColor="#2badee"
+						title="Pull to refresh"
+					/>
+				}
+			>
 				{/* Categories Scroll */}
 				<ScrollView
 					horizontal
@@ -188,20 +319,87 @@ export default function BrowseScreen() {
 					))}
 				</ScrollView>
 
-				{/* Products Grid */}
-				<View style={styles.productsGrid}>
-					{products.map((item) => (
-						<View key={item.id} style={styles.gridColumn}>
-							{renderProductCard({ item })}
-						</View>
-					))}
+				{/* Results Count */}
+				<View style={styles.resultsHeader}>
+					<Text style={styles.resultsText}>
+						Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
+					</Text>
+					{(appliedFilters.priceRange[0] !== 50 || appliedFilters.priceRange[1] !== 1200 || appliedFilters.sortBy !== 'popularity') && (
+						<TouchableOpacity
+							onPress={() => {
+								setAppliedFilters({
+									categories: ['All'],
+									sortBy: 'popularity',
+									brands: [],
+									priceRange: [50, 1200],
+								});
+							}}
+						>
+							<Text style={styles.resetFiltersText}>Reset filters</Text>
+						</TouchableOpacity>
+					)}
 				</View>
+
+				{/* Error State */}
+				{error && (
+					<View style={styles.errorContainer}>
+						<View style={styles.errorContent}>
+							<MaterialCommunityIcons
+								name="alert-circle"
+								size={48}
+								color="#ef4444"
+								style={styles.errorIcon}
+							/>
+							<Text style={styles.errorTitle}>Unable to load products</Text>
+							<Text style={styles.errorMessage}>{error.message}</Text>
+							<TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
+								<MaterialCommunityIcons name="refresh" size={18} color="#fff" />
+								<Text style={styles.retryButtonText}>Retry</Text>
+							</TouchableOpacity>
+						</View>
+					</View>
+				)}
+
+				{/* Products Grid / Loading State */}
+				{!error && (
+					<View style={styles.productsGrid}>
+						{isLoading ? (
+							// Show skeleton loaders while loading
+							Array.from({ length: 4 }).map((_, index) => (
+								<View key={`skeleton-${index}`} style={styles.gridColumn}>
+									<ProductSkeleton />
+								</View>
+							))
+						) : filteredProducts.length > 0 ? (
+							// Show actual products
+							filteredProducts.map((item) => (
+								<View key={item.id} style={styles.gridColumn}>
+									{renderProductCard({ item })}
+								</View>
+							))
+						) : (
+							// Show empty state
+							<View style={styles.emptyStateContainer}>
+								<MaterialCommunityIcons
+									name="magnify"
+									size={48}
+									color="rgba(255, 255, 255, 0.3)"
+									style={styles.emptyIcon}
+								/>
+								<Text style={styles.emptyText}>No products found</Text>
+								<Text style={styles.emptySubtext}>
+									Try adjusting your filters or search terms
+								</Text>
+							</View>
+						)}
+					</View>
+				)}
 
 				<View style={styles.spacer} />
 			</ScrollView>
 
 			{/* Filter FAB */}
-			<TouchableOpacity style={styles.filterFab}>
+			<TouchableOpacity style={styles.filterFab} onPress={() => setShowFilter(true)}>
 				<MaterialCommunityIcons
 					name="tune"
 					size={20}
@@ -209,6 +407,16 @@ export default function BrowseScreen() {
 				/>
 				<Text style={styles.filterFabText}>Filter</Text>
 			</TouchableOpacity>
+
+			{/* Filter Modal */}
+			<FilterModal
+				visible={showFilter}
+				onClose={() => setShowFilter(false)}
+				onApply={(filters) => {
+					setAppliedFilters(filters);
+					setShowFilter(false);
+				}}
+			/>
 		</SafeAreaView>
 	);
 }
@@ -434,7 +642,7 @@ const styles = StyleSheet.create({
 	},
 	filterFab: {
 		position: 'absolute',
-		bottom: 100,
+		bottom: 180,
 		right: 16,
 		backgroundColor: '#2b6cee',
 		paddingHorizontal: 16,
@@ -456,5 +664,93 @@ const styles = StyleSheet.create({
 	},
 	spacer: {
 		height: 120,
+	},
+	emptyStateContainer: {
+		width: '100%',
+		paddingVertical: 60,
+		paddingHorizontal: 20,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	emptyIcon: {
+		marginBottom: 16,
+		opacity: 0.5,
+	},
+	emptyText: {
+		fontSize: 18,
+		fontWeight: '700',
+		color: '#fff',
+		marginBottom: 8,
+		textAlign: 'center',
+	},
+	emptySubtext: {
+		fontSize: 14,
+		color: 'rgba(255, 255, 255, 0.5)',
+		textAlign: 'center',
+	},
+	resultsHeader: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		paddingHorizontal: 20,
+		paddingVertical: 12,
+		marginTop: 8,
+	},
+	resultsText: {
+		fontSize: 14,
+		fontWeight: '600',
+		color: 'rgba(255, 255, 255, 0.7)',
+	},
+	resetFiltersText: {
+		fontSize: 12,
+		fontWeight: '700',
+		color: '#2b6cee',
+	},
+	errorContainer: {
+		width: '100%',
+		paddingHorizontal: 20,
+		paddingVertical: 40,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	errorContent: {
+		width: '100%',
+		borderRadius: 20,
+		padding: 24,
+		backgroundColor: 'rgba(239, 68, 68, 0.1)',
+		borderWidth: 1,
+		borderColor: 'rgba(239, 68, 68, 0.3)',
+		alignItems: 'center',
+	},
+	errorIcon: {
+		marginBottom: 16,
+	},
+	errorTitle: {
+		fontSize: 18,
+		fontWeight: '700',
+		color: '#fff',
+		marginBottom: 8,
+		textAlign: 'center',
+	},
+	errorMessage: {
+		fontSize: 14,
+		color: 'rgba(255, 255, 255, 0.6)',
+		textAlign: 'center',
+		marginBottom: 20,
+		lineHeight: 20,
+	},
+	retryButton: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		paddingHorizontal: 24,
+		paddingVertical: 12,
+		backgroundColor: '#ef4444',
+		borderRadius: 12,
+		gap: 8,
+	},
+	retryButtonText: {
+		color: '#fff',
+		fontSize: 14,
+		fontWeight: '600',
 	},
 });

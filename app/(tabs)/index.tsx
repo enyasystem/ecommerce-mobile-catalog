@@ -86,19 +86,26 @@ export default function HomeScreen() {
 				</View>
 
 				{/* Search Bar */}
-				<View style={styles.searchContainer}>
-					<MaterialCommunityIcons name="magnify" size={16} color="rgba(255, 255, 255, 0.5)" style={{ marginRight: 12 }} />
-					<TextInput
-						style={styles.searchInput}
-						placeholder="Search for premium gear..."
-						placeholderTextColor="rgba(255, 255, 255, 0.4)"
-						value={searchText}
-						onChangeText={setSearchText}
-					/>
-					<TouchableOpacity style={styles.micBtn}>
-						<MaterialCommunityIcons name="microphone" size={18} color="#fff" />
-					</TouchableOpacity>
-				</View>
+				<TouchableOpacity
+					onPress={() => router.push('/(tabs)/search')}
+					activeOpacity={0.7}
+					style={{borderRadius: 16}}
+				>
+					<View style={styles.searchContainer}>
+						<MaterialCommunityIcons name="magnify" size={16} color="rgba(255, 255, 255, 0.5)" style={{ marginRight: 12 }} />
+						<TextInput
+							style={styles.searchInput}
+							placeholder="Search for premium gear..."
+							placeholderTextColor="rgba(255, 255, 255, 0.4)"
+							value={searchText}
+							editable={false}
+							onChangeText={setSearchText}
+						/>
+						<TouchableOpacity style={styles.micBtn} onPress={() => router.push('/(tabs)/search')}>
+							<MaterialCommunityIcons name="microphone" size={18} color="#fff" />
+						</TouchableOpacity>
+					</View>
+				</TouchableOpacity>
 			</View>
 
 			{/* Category Filter */}
