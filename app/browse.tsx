@@ -8,9 +8,9 @@ import {
 	TouchableOpacity,
 	Image,
 	Dimensions,
-	SafeAreaView,
 	RefreshControl,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import FilterModal from '../components/FilterModal';

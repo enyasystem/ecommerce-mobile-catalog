@@ -8,9 +8,9 @@ import {
 	TouchableOpacity,
 	Image,
 	Dimensions,
-	SafeAreaView,
 	FlatList,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
