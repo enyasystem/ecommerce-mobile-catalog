@@ -12,15 +12,8 @@ function CustomTabBarContent({ state, descriptors, navigation }: any) {
   return (
     <View style={[styles.tabBarContainer, { paddingBottom: insets.bottom + 8 }]}>
       <View style={styles.tabBar}>
-          {/* Glass blur + subtle gradient overlay for frosted look */}
-          <BlurView intensity={0} tint="light" style={styles.tabBarBlur} pointerEvents="none" />
-          <LinearGradient
-            colors={["rgba(255,246,224,0.95)", "rgba(255,246,224,0.95)"]}
-            start={[0, 0]}
-            end={[1, 1]}
-            style={styles.tabBarGradient}
-            pointerEvents="none"
-          />
+          {/* Glass blur for frosted glass effect */}
+          <BlurView intensity={40} tint="light" style={styles.tabBarBlur} pointerEvents="none" />
         <View style={styles.tabsLeft}>
           {state.routes.slice(0, 2).map((route: any, index: number) => {
             const { options } = descriptors[route.key];
@@ -317,16 +310,6 @@ const styles = StyleSheet.create<Record<string, any>>({
     justifyContent: 'center',
   },
 
-  tabBarGradient: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    borderRadius: 36,
-    zIndex: 1,
-    opacity: 0.9,
-  },
   tabBarBlur: {
     position: 'absolute',
     left: 0,
@@ -334,7 +317,7 @@ const styles = StyleSheet.create<Record<string, any>>({
     top: 0,
     bottom: 0,
     borderRadius: 36,
-    zIndex: 0,
+    zIndex: 1,
     overflow: 'hidden',
   },
   /* filter button removed */
