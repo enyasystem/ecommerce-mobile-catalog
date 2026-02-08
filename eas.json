@@ -1,8 +1,9 @@
 {
+  "$schema": "./.vscode/expo-local-schema.json",
   "build": {
     "production": {
       "android": {
-        "buildType": "apk",
+        "buildType": "app-bundle",
         "env": {
           "EXPO_NO_DEV_CLIENT": "1"
         }
