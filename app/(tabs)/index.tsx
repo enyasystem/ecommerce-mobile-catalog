@@ -32,8 +32,8 @@ export default function HomeScreen() {
 	const { data: apiProducts = [], isLoading } = useGetProductsQuery();
 
 	// Transform API products to UI format
-	const products = useMemo(() => {
-		let result = apiProducts.map((product) => ({
+	const allProducts = useMemo(() => {
+		return apiProducts.map((product) => ({
 			id: product.id.toString(),
 			name: product.title,
 			price: Math.round(product.price),
@@ -42,6 +42,11 @@ export default function HomeScreen() {
 			isNew: false,
 			category: product.category,
 		}));
+	}, [apiProducts]);
+
+	// Get filtered products based on selected category
+	const products = useMemo(() => {
+		let result = [...allProducts];
 
 		// Filter by selected category
 		if (selectedCategory !== 'All') {
@@ -49,7 +54,12 @@ export default function HomeScreen() {
 		}
 
 		return result.slice(0, 6); // Show only 6 products on home tab
-	}, [apiProducts, selectedCategory]);
+	}, [allProducts, selectedCategory]);
+
+	// Get products for specific category (for section carousels)
+	const getProductsByCategory = (category: string) => {
+		return allProducts.filter((p) => p.category === category).slice(0, 6);
+	};
 
 	// Flash sale end time (configurable). Default starts at ~04:28:12 from now
 	const FLASH_SALE_END = new Date(Date.now() + (4 * 3600 + 28 * 60 + 12) * 1000);
@@ -231,6 +241,330 @@ export default function HomeScreen() {
 					))
 				) : (
 					products.map((product) => (
+						<TouchableOpacity
+							key={product.id}
+							style={styles.productCarouselCard}
+							activeOpacity={0.92}
+							onPress={() => {
+								router.push({
+									pathname: '/product/[id]',
+									params: {
+										id: product.id,
+										name: product.name,
+										price: product.price,
+										image: product.image,
+										originalPrice: product.originalPrice || '',
+									},
+								});
+							}}
+						>
+							<View style={styles.productImageContainer}>
+								{product.isNew && (
+									<View style={styles.newBadge}>
+										<Text style={styles.newBadgeText}>NEW</Text>
+									</View>
+								)}
+								<TouchableOpacity style={styles.favoriteBtn}>
+									<MaterialCommunityIcons name="heart-outline" size={18} color="#fff" />
+								</TouchableOpacity>
+								<Image
+									source={{ uri: product.image }}
+									style={styles.productImage}
+								/>
+							</View>
+							<Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
+							<View style={styles.productFooter}>
+								<View style={styles.priceWrap}>
+									{product.originalPrice && (
+										<Text style={styles.originalPrice}>
+											${product.originalPrice}
+										</Text>
+									)}
+									<Text style={styles.productPrice}>${product.price}</Text>
+								</View>
+								<TouchableOpacity style={styles.addBtn}>
+									<MaterialCommunityIcons name="plus" size={18} color="#fff" />
+								</TouchableOpacity>
+							</View>
+						</TouchableOpacity>
+					))
+				)}
+			</ScrollView>
+
+			{/* Electronics Section */}
+			<View style={styles.sectionHeader}>
+				<Text style={styles.sectionTitle}>Electronics</Text>
+				<TouchableOpacity>
+					<Text style={styles.viewAllBtn}>View All</Text>
+				</TouchableOpacity>
+			</View>
+			<ScrollView
+				horizontal
+				showsHorizontalScrollIndicator={false}
+				decelerationRate="fast"
+				snapToAlignment="center"
+				scrollEventThrottle={16}
+				contentContainerStyle={styles.carouselContent}
+			>
+				{isLoading ? (
+					Array.from({ length: 3 }).map((_, index) => (
+						<View key={`skeleton-electronics-${index}`} style={styles.productCarouselCard}>
+							<View style={[styles.productImageContainer, styles.skeletonImage]} />
+							<View style={styles.skeletonContainer}>
+								<View style={[styles.skeletonBar, { width: '75%', height: 16 }]} />
+								<View style={[styles.skeletonBar, { width: '50%', height: 12, marginTop: 8 }]} />
+								<View style={styles.skeletonFooter}>
+									<View style={[styles.skeletonBar, { width: 40, height: 20 }]} />
+									<View style={[styles.skeletonBar, { width: 32, height: 32, borderRadius: 16 }]} />
+								</View>
+							</View>
+						</View>
+					))
+				) : (
+					getProductsByCategory('electronics').map((product) => (
+						<TouchableOpacity
+							key={product.id}
+							style={styles.productCarouselCard}
+							activeOpacity={0.92}
+							onPress={() => {
+								router.push({
+									pathname: '/product/[id]',
+									params: {
+										id: product.id,
+										name: product.name,
+										price: product.price,
+										image: product.image,
+										originalPrice: product.originalPrice || '',
+									},
+								});
+							}}
+						>
+							<View style={styles.productImageContainer}>
+								{product.isNew && (
+									<View style={styles.newBadge}>
+										<Text style={styles.newBadgeText}>NEW</Text>
+									</View>
+								)}
+								<TouchableOpacity style={styles.favoriteBtn}>
+									<MaterialCommunityIcons name="heart-outline" size={18} color="#fff" />
+								</TouchableOpacity>
+								<Image
+									source={{ uri: product.image }}
+									style={styles.productImage}
+								/>
+							</View>
+							<Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
+							<View style={styles.productFooter}>
+								<View style={styles.priceWrap}>
+									{product.originalPrice && (
+										<Text style={styles.originalPrice}>
+											${product.originalPrice}
+										</Text>
+									)}
+									<Text style={styles.productPrice}>${product.price}</Text>
+								</View>
+								<TouchableOpacity style={styles.addBtn}>
+									<MaterialCommunityIcons name="plus" size={18} color="#fff" />
+								</TouchableOpacity>
+							</View>
+						</TouchableOpacity>
+					))
+				)}
+			</ScrollView>
+
+			{/* Men's Clothing Section */}
+			<View style={styles.sectionHeader}>
+				<Text style={styles.sectionTitle}>Men's Clothing</Text>
+				<TouchableOpacity>
+					<Text style={styles.viewAllBtn}>View All</Text>
+				</TouchableOpacity>
+			</View>
+			<ScrollView
+				horizontal
+				showsHorizontalScrollIndicator={false}
+				decelerationRate="fast"
+				snapToAlignment="center"
+				scrollEventThrottle={16}
+				contentContainerStyle={styles.carouselContent}
+			>
+				{isLoading ? (
+					Array.from({ length: 3 }).map((_, index) => (
+						<View key={`skeleton-mens-${index}`} style={styles.productCarouselCard}>
+							<View style={[styles.productImageContainer, styles.skeletonImage]} />
+							<View style={styles.skeletonContainer}>
+								<View style={[styles.skeletonBar, { width: '75%', height: 16 }]} />
+								<View style={[styles.skeletonBar, { width: '50%', height: 12, marginTop: 8 }]} />
+								<View style={styles.skeletonFooter}>
+									<View style={[styles.skeletonBar, { width: 40, height: 20 }]} />
+									<View style={[styles.skeletonBar, { width: 32, height: 32, borderRadius: 16 }]} />
+								</View>
+							</View>
+						</View>
+					))
+				) : (
+					getProductsByCategory("men's clothing").map((product) => (
+						<TouchableOpacity
+							key={product.id}
+							style={styles.productCarouselCard}
+							activeOpacity={0.92}
+							onPress={() => {
+								router.push({
+									pathname: '/product/[id]',
+									params: {
+										id: product.id,
+										name: product.name,
+										price: product.price,
+										image: product.image,
+										originalPrice: product.originalPrice || '',
+									},
+								});
+							}}
+						>
+							<View style={styles.productImageContainer}>
+								{product.isNew && (
+									<View style={styles.newBadge}>
+										<Text style={styles.newBadgeText}>NEW</Text>
+									</View>
+								)}
+								<TouchableOpacity style={styles.favoriteBtn}>
+									<MaterialCommunityIcons name="heart-outline" size={18} color="#fff" />
+								</TouchableOpacity>
+								<Image
+									source={{ uri: product.image }}
+									style={styles.productImage}
+								/>
+							</View>
+							<Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
+							<View style={styles.productFooter}>
+								<View style={styles.priceWrap}>
+									{product.originalPrice && (
+										<Text style={styles.originalPrice}>
+											${product.originalPrice}
+										</Text>
+									)}
+									<Text style={styles.productPrice}>${product.price}</Text>
+								</View>
+								<TouchableOpacity style={styles.addBtn}>
+									<MaterialCommunityIcons name="plus" size={18} color="#fff" />
+								</TouchableOpacity>
+							</View>
+						</TouchableOpacity>
+					))
+				)}
+			</ScrollView>
+
+			{/* Women's Clothing Section */}
+			<View style={styles.sectionHeader}>
+				<Text style={styles.sectionTitle}>Women's Clothing</Text>
+				<TouchableOpacity>
+					<Text style={styles.viewAllBtn}>View All</Text>
+				</TouchableOpacity>
+			</View>
+			<ScrollView
+				horizontal
+				showsHorizontalScrollIndicator={false}
+				decelerationRate="fast"
+				snapToAlignment="center"
+				scrollEventThrottle={16}
+				contentContainerStyle={styles.carouselContent}
+			>
+				{isLoading ? (
+					Array.from({ length: 3 }).map((_, index) => (
+						<View key={`skeleton-womens-${index}`} style={styles.productCarouselCard}>
+							<View style={[styles.productImageContainer, styles.skeletonImage]} />
+							<View style={styles.skeletonContainer}>
+								<View style={[styles.skeletonBar, { width: '75%', height: 16 }]} />
+								<View style={[styles.skeletonBar, { width: '50%', height: 12, marginTop: 8 }]} />
+								<View style={styles.skeletonFooter}>
+									<View style={[styles.skeletonBar, { width: 40, height: 20 }]} />
+									<View style={[styles.skeletonBar, { width: 32, height: 32, borderRadius: 16 }]} />
+								</View>
+							</View>
+						</View>
+					))
+				) : (
+					getProductsByCategory("women's clothing").map((product) => (
+						<TouchableOpacity
+							key={product.id}
+							style={styles.productCarouselCard}
+							activeOpacity={0.92}
+							onPress={() => {
+								router.push({
+									pathname: '/product/[id]',
+									params: {
+										id: product.id,
+										name: product.name,
+										price: product.price,
+										image: product.image,
+										originalPrice: product.originalPrice || '',
+									},
+								});
+							}}
+						>
+							<View style={styles.productImageContainer}>
+								{product.isNew && (
+									<View style={styles.newBadge}>
+										<Text style={styles.newBadgeText}>NEW</Text>
+									</View>
+								)}
+								<TouchableOpacity style={styles.favoriteBtn}>
+									<MaterialCommunityIcons name="heart-outline" size={18} color="#fff" />
+								</TouchableOpacity>
+								<Image
+									source={{ uri: product.image }}
+									style={styles.productImage}
+								/>
+							</View>
+							<Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
+							<View style={styles.productFooter}>
+								<View style={styles.priceWrap}>
+									{product.originalPrice && (
+										<Text style={styles.originalPrice}>
+											${product.originalPrice}
+										</Text>
+									)}
+									<Text style={styles.productPrice}>${product.price}</Text>
+								</View>
+								<TouchableOpacity style={styles.addBtn}>
+									<MaterialCommunityIcons name="plus" size={18} color="#fff" />
+								</TouchableOpacity>
+							</View>
+						</TouchableOpacity>
+					))
+				)}
+			</ScrollView>
+
+			{/* Jewelry Section */}
+			<View style={styles.sectionHeader}>
+				<Text style={styles.sectionTitle}>Jewelry</Text>
+				<TouchableOpacity>
+					<Text style={styles.viewAllBtn}>View All</Text>
+				</TouchableOpacity>
+			</View>
+			<ScrollView
+				horizontal
+				showsHorizontalScrollIndicator={false}
+				decelerationRate="fast"
+				snapToAlignment="center"
+				scrollEventThrottle={16}
+				contentContainerStyle={styles.carouselContent}
+			>
+				{isLoading ? (
+					Array.from({ length: 3 }).map((_, index) => (
+						<View key={`skeleton-jewelry-${index}`} style={styles.productCarouselCard}>
+							<View style={[styles.productImageContainer, styles.skeletonImage]} />
+							<View style={styles.skeletonContainer}>
+								<View style={[styles.skeletonBar, { width: '75%', height: 16 }]} />
+								<View style={[styles.skeletonBar, { width: '50%', height: 12, marginTop: 8 }]} />
+								<View style={styles.skeletonFooter}>
+									<View style={[styles.skeletonBar, { width: 40, height: 20 }]} />
+									<View style={[styles.skeletonBar, { width: 32, height: 32, borderRadius: 16 }]} />
+								</View>
+							</View>
+						</View>
+					))
+				) : (
+					getProductsByCategory('jewelery').map((product) => (
 						<TouchableOpacity
 							key={product.id}
 							style={styles.productCarouselCard}
