@@ -13,9 +13,9 @@ function CustomTabBarContent({ state, descriptors, navigation }: any) {
     <View style={[styles.tabBarContainer, { paddingBottom: insets.bottom + 8 }]}>
       <View style={styles.tabBar}>
           {/* Glass blur + subtle gradient overlay for frosted look */}
-          <BlurView intensity={50} tint="dark" style={styles.tabBarBlur} pointerEvents="none" />
+          <BlurView intensity={0} tint="light" style={styles.tabBarBlur} pointerEvents="none" />
           <LinearGradient
-            colors={["rgba(255,255,255,0.02)", "rgba(255,255,255,0.01)"]}
+            colors={["rgba(255,246,224,0.95)", "rgba(255,246,224,0.95)"]}
             start={[0, 0]}
             end={[1, 1]}
             style={styles.tabBarGradient}
@@ -46,9 +46,9 @@ function CustomTabBarContent({ state, descriptors, navigation }: any) {
                 style={styles.tabItem}
               >
                 <MaterialCommunityIcons
-                  name={options.tabBarIcon?.({ color: isFocused ? '#2b6cee' : 'rgba(255, 255, 255, 0.4)', size: 24 }).props.name}
-                  size={24}
-                  color={isFocused ? '#2b6cee' : 'rgba(255, 255, 255, 0.4)'}
+                  name={options.tabBarIcon?.({ color: isFocused ? '#2b6cee' : '#000', size: 26 }).props.name}
+                  size={26}
+                  color={isFocused ? '#2b6cee' : '#000'}
                 />
                 <Text
                   style={[
@@ -116,9 +116,9 @@ function CustomTabBarContent({ state, descriptors, navigation }: any) {
                 style={styles.tabItem}
               >
                 <MaterialCommunityIcons
-                  name={options.tabBarIcon?.({ color: isFocused ? '#2b6cee' : 'rgba(100, 100, 120, 0.5)', size: 24 }).props.name}
-                  size={24}
-                  color={isFocused ? '#2b6cee' : 'rgba(100, 100, 120, 0.5)'}
+                  name={options.tabBarIcon?.({ color: isFocused ? '#2b6cee' : '#000', size: 26 }).props.name}
+                  size={26}
+                  color={isFocused ? '#2b6cee' : '#000'}
                 />
                 <Text
                   style={[
@@ -206,7 +206,7 @@ export default function RootLayout() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = StyleSheet.create<Record<string, any>>({
   tabBarContainer: {
     position: 'absolute',
     bottom: 0,
@@ -228,9 +228,9 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 360,
     paddingHorizontal: 6,
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: '#FFF6E0',
+    borderWidth: 0,
+    borderColor: 'transparent',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 14 },
     shadowOpacity: 0.55,
@@ -261,16 +261,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   tabLabel: {
-    fontSize: 9,
-    fontWeight: '500',
-    color: 'rgba(255, 255, 255, 0.4)',
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#000',
   },
   tabLabelLight: {
-    color: 'rgba(100, 100, 120, 0.5)',
+    color: '#000',
   },
   tabLabelActive: {
     color: '#2b6cee',
-    fontWeight: '700',
+    fontWeight: '800',
   },
   indicatorDot: {
     position: 'absolute',

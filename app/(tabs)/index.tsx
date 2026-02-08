@@ -8,6 +8,7 @@ import {
 	TextInput,
 	Image,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const CATEGORIES = ['All', 'Audio', 'Wearables', 'Smart Home', 'Photography'];
@@ -45,6 +46,7 @@ const PRODUCTS = [
 export default function HomeScreen() {
 	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [searchText, setSearchText] = useState('');
+	const router = useRouter();
 
 	// Flash sale end time (configurable). Default starts at ~04:28:12 from now
 	const FLASH_SALE_END = new Date(Date.now() + (4 * 3600 + 28 * 60 + 12) * 1000);
@@ -184,7 +186,15 @@ export default function HomeScreen() {
 			{/* Products Grid */}
 			<View style={styles.productsGrid}>
 				{PRODUCTS.map((product) => (
-					<View key={product.id} style={styles.productCard}>
+					<TouchableOpacity
+						key={product.id}
+						style={styles.productCard}
+						activeOpacity={0.92}
+						onPress={() => {
+							const q = `?name=${encodeURIComponent(product.name)}&price=${encodeURIComponent(String(product.price))}&image=${encodeURIComponent(product.image || '')}&description=${encodeURIComponent((product as any).description || '')}`;
+							router.push(`/product/${product.id}${q}`);
+						}}
+					>
 						<View style={styles.productImageContainer}>
 							{product.isNew && (
 								<View style={styles.newBadge}>
@@ -198,7 +208,7 @@ export default function HomeScreen() {
 								source={{ uri: product.image }}
 								style={styles.productImage}
 							/>
-					
+				
 						</View>
 						<Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
 						<View style={styles.productFooter}>
@@ -214,7 +224,7 @@ export default function HomeScreen() {
 								<MaterialCommunityIcons name="plus" size={18} color="#fff" />
 							</TouchableOpacity>
 						</View>
-					</View>
+					</TouchableOpacity>
 				))}
 				{/* Skeleton Loader Card */}
 				<View style={styles.productCard}>
