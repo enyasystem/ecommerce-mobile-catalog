@@ -54,9 +54,6 @@ export default function HomeScreen() {
 
 	// Continuous attention-grabbing animations - stored in refs to persist across renders
 	const heroFloatRef = useRef<any>(null);
-	const featuredMarqueeRef = useRef<any>(null);
-	const womensMarqueeRef = useRef<any>(null);
-	const newArrivalsMarqueeRef = useRef<any>(null);
 
 	// Fetch products from FakeStore API
 	const { data: apiProducts = [], isLoading } = useGetProductsQuery();
@@ -158,35 +155,6 @@ export default function HomeScreen() {
 		};
 	}, []);
 
-	// Initialize and start marquee animations on featured sections
-	useEffect(() => {
-		if (!featuredMarqueeRef.current) {
-			featuredMarqueeRef.current = createMarqueeAnimation(3000);
-		}
-		if (!womensMarqueeRef.current) {
-			womensMarqueeRef.current = createMarqueeAnimation(3000);
-		}
-		if (!newArrivalsMarqueeRef.current) {
-			newArrivalsMarqueeRef.current = createMarqueeAnimation(3000);
-		}
-		
-		featuredMarqueeRef.current.startMarquee();
-		womensMarqueeRef.current.startMarquee();
-		newArrivalsMarqueeRef.current.startMarquee();
-		
-		return () => {
-			if (featuredMarqueeRef.current) {
-				featuredMarqueeRef.current.stop();
-			}
-			if (womensMarqueeRef.current) {
-				womensMarqueeRef.current.stop();
-			}
-			if (newArrivalsMarqueeRef.current) {
-				newArrivalsMarqueeRef.current.stop();
-			}
-		};
-	}, []);
-
 	// Helper function to get or create favorite bounce animation for a product
 	const getFavoriteBounceAnimation = (productId: string) => {
 		if (!favoriteBounceAnimations[productId]) {
@@ -198,6 +166,21 @@ export default function HomeScreen() {
 			return newAnim;
 		}
 		return favoriteBounceAnimations[productId];
+	};
+
+	// Helper to create marquee animations for product cards
+	const [productMarqueeAnimations, setProductMarqueeAnimations] = useState<{ [key: string]: any }>({});
+	const getProductMarqueeAnimation = (productId: string) => {
+		if (!productMarqueeAnimations[productId]) {
+			const newAnim = createMarqueeAnimation(3000);
+			newAnim.startMarquee();
+			setProductMarqueeAnimations(prev => ({
+				...prev,
+				[productId]: newAnim
+			}));
+			return newAnim;
+		}
+		return productMarqueeAnimations[productId];
 	};
 
 	useEffect(() => {
@@ -322,24 +305,12 @@ export default function HomeScreen() {
 			</View>
 
 			{/* New Arrivals Carousel */}
-			<Animated.View 
-				style={[
-					styles.sectionHeader,
-					newArrivalsMarqueeRef.current?.animatedStyle || {},
-					{
-						paddingVertical: 20,
-						paddingHorizontal: 16,
-						marginHorizontal: -16,
-						marginVertical: 8,
-					}
-				]}
-			>
-				<Text style={styles.sectionTitle}>New Arrivals</Text>
-				<TouchableOpacity>
-					<Text style={styles.viewAllBtn}>View All</Text>
-				</TouchableOpacity>
-			</Animated.View>
-
+		<View style={styles.sectionHeader}>
+			<Text style={styles.sectionTitle}>New Arrivals</Text>
+			<TouchableOpacity>
+				<Text style={styles.viewAllBtn}>View All</Text>
+			</TouchableOpacity>
+		</View>
 			<ScrollView
 				horizontal
 				showsHorizontalScrollIndicator={false}
@@ -365,12 +336,14 @@ export default function HomeScreen() {
 				) : (
 					allProducts.slice(0, 8).map((product, carIndex) => {
 						const favAnim = getFavoriteBounceAnimation(product.id);
+						const marqueeAnim = getProductMarqueeAnimation(product.id);
 						return (
 							<Animated.View
 								key={product.id}
 								style={[
 									styles.productCarouselCard,
-									carouselAnimations[carIndex]?.animatedStyle || {}
+									carouselAnimations[carIndex]?.animatedStyle || {},
+									marqueeAnim?.animatedStyle || {}
 								]}
 							>
 								<TouchableOpacity
@@ -496,24 +469,12 @@ export default function HomeScreen() {
 			</View>
 
 			{/* Featured Products Section */}
-			<Animated.View 
-				style={[
-					styles.sectionHeader,
-					featuredMarqueeRef.current?.animatedStyle || {},
-					{
-						paddingVertical: 20,
-						paddingHorizontal: 16,
-						marginHorizontal: -16,
-						marginVertical: 8,
-					}
-				]}
-			>
-				<Text style={styles.sectionTitle}>Featured Products</Text>
-				<TouchableOpacity>
-					<Text style={styles.viewAllBtn}>View All</Text>
-				</TouchableOpacity>
-			</Animated.View>
-
+		<View style={styles.sectionHeader}>
+			<Text style={styles.sectionTitle}>Featured Products</Text>
+			<TouchableOpacity>
+				<Text style={styles.viewAllBtn}>View All</Text>
+			</TouchableOpacity>
+		</View>
 			{/* Products Carousel */}
 			<ScrollView
 				horizontal
@@ -638,24 +599,32 @@ export default function HomeScreen() {
 						</View>
 					))
 				) : (
-					getProductsByCategory('electronics').map((product) => (
-						<TouchableOpacity
-							key={product.id}
-							style={styles.productCarouselCard}
-							activeOpacity={0.92}
-							onPress={() => {
-								router.push({
-									pathname: '/product/[id]',
-									params: {
-										id: product.id,
-										name: product.name,
-										price: product.price,
-										image: product.image,
-										originalPrice: product.originalPrice || '',
-									},
-								});
-							}}
-						>
+					getProductsByCategory('electronics').map((product) => {
+						const marqueeAnim = getProductMarqueeAnimation(product.id);
+						return (
+							<Animated.View
+								key={product.id}
+								style={[
+									styles.productCarouselCard,
+									marqueeAnim?.animatedStyle || {}
+								]}
+							>
+								<TouchableOpacity
+									activeOpacity={0.92}
+									onPress={() => {
+										router.push({
+											pathname: '/product/[id]',
+											params: {
+												id: product.id,
+												name: product.name,
+												price: product.price,
+												image: product.image,
+												originalPrice: product.originalPrice || '',
+											},
+										});
+									}}
+									style={{ flex: 1 }}
+								>
 							<View style={styles.productImageContainer}>
 								{product.isNew && (
 									<View style={styles.newBadge}>
@@ -716,8 +685,10 @@ export default function HomeScreen() {
 								</TouchableOpacity>
 							</View>
 						</TouchableOpacity>
-					))
-				)}
+					</Animated.View>
+					);
+				})
+			)}
 			</ScrollView>
 
 			{/* Men's Clothing Section */}
@@ -833,23 +804,12 @@ export default function HomeScreen() {
 			</ScrollView>
 
 			{/* Women's Clothing Section */}
-			<Animated.View 
-				style={[
-					styles.sectionHeader,
-					womensMarqueeRef.current?.animatedStyle || {},
-					{
-						paddingVertical: 20,
-						paddingHorizontal: 16,
-						marginHorizontal: -16,
-						marginVertical: 8,
-					}
-				]}
-			>
+			<View style={styles.sectionHeader}>
 				<Text style={styles.sectionTitle}>Women's Clothing</Text>
 				<TouchableOpacity>
 					<Text style={styles.viewAllBtn}>View All</Text>
 				</TouchableOpacity>
-			</Animated.View>
+			</View>
 			<ScrollView
 				horizontal
 				showsHorizontalScrollIndicator={false}
@@ -873,25 +833,33 @@ export default function HomeScreen() {
 						</View>
 					))
 				) : (
-					getProductsByCategory("women's clothing").map((product) => (
-						<TouchableOpacity
-							key={product.id}
-							style={styles.productCarouselCard}
-							activeOpacity={0.92}
-							onPress={() => {
-								router.push({
-									pathname: '/product/[id]',
-									params: {
-										id: product.id,
-										name: product.name,
-										price: product.price,
-										image: product.image,
-										originalPrice: product.originalPrice || '',
-									},
-								});
-							}}
-						>
-							<View style={styles.productImageContainer}>
+					getProductsByCategory("women's clothing").map((product) => {
+						const marqueeAnim = getProductMarqueeAnimation(product.id);
+						return (
+							<Animated.View
+								key={product.id}
+								style={[
+									styles.productCarouselCard,
+									marqueeAnim?.animatedStyle || {}
+								]}
+							>
+								<TouchableOpacity
+									style={{ flex: 1 }}
+									activeOpacity={0.92}
+									onPress={() => {
+										router.push({
+											pathname: '/product/[id]',
+											params: {
+												id: product.id,
+												name: product.name,
+												price: product.price,
+												image: product.image,
+												originalPrice: product.originalPrice || '',
+											},
+										});
+									}}
+								>
+									<View style={styles.productImageContainer}>
 								{product.isNew && (
 									<View style={styles.newBadge}>
 										<Text style={styles.newBadgeText}>NEW</Text>
@@ -951,8 +919,10 @@ export default function HomeScreen() {
 								</TouchableOpacity>
 							</View>
 						</TouchableOpacity>
-					))
-				)}
+					</Animated.View>
+					);
+				})
+			)}
 			</ScrollView>
 
 			{/* Jewelry Section */}
