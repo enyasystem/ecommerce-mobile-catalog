@@ -171,25 +171,7 @@ export default function ProductDetailsScreen() {
           <Text style={styles.buyText}>Buy Now</Text>
         </TouchableOpacity>
 
-        <View style={[styles.floatingTabs, { bottom: insets.bottom + 16 }] }>
-          <TouchableOpacity style={styles.tabBtn}>
-            <MaterialCommunityIcons name="home" size={22} color="rgba(255,255,255,0.6)" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.tabBtn}>
-            <MaterialCommunityIcons name="magnify" size={22} color="rgba(255,255,255,0.6)" />
-          </TouchableOpacity>
-          <View style={styles.centerAction}>
-            <TouchableOpacity style={styles.centerBtn}>
-              <MaterialCommunityIcons name="cart" size={20} color="#000" />
-            </TouchableOpacity>
-          </View>
-          <TouchableOpacity style={styles.tabBtn}>
-            <MaterialCommunityIcons name="heart-outline" size={22} color="rgba(255,255,255,0.6)" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.tabBtn}>
-            <MaterialCommunityIcons name="account" size={22} color="rgba(255,255,255,0.6)" />
-          </TouchableOpacity>
-        </View>
+        {/* floatingTabs removed to avoid duplicate main tab bar overlap */}
       </View>
     </View>
   );
