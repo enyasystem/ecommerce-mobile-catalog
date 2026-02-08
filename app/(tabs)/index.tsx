@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
 	View,
 	Text,
@@ -10,8 +10,9 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useGetProductsQuery } from '../../features/products/productsAPI';
 
-const CATEGORIES = ['All', 'Audio', 'Wearables', 'Smart Home', 'Photography'];
+const CATEGORIES = ['All', 'electronics', "men's clothing", "women's clothing", 'jewelery'];
 const BRANDS = [
 	{ id: '1', name: 'Aerospace', icon: 'rocket-launch' },
 	{ id: '2', name: 'Luxury', icon: 'diamond-stone' },
@@ -20,33 +21,34 @@ const BRANDS = [
 	{ id: '5', name: 'Stellar', icon: 'star-four-points' },
 	{ id: '6', name: 'Vortex', icon: 'fan' },
 ];
-const PRODUCTS = [
-	{
-		id: '1',
-		name: 'Nexus Pro Wireless ANC',
-		price: 299,
-		originalPrice: 349,
-		image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAAyo8s8cOPxPs6GHiMbibuJRx5UhsJiRrngtKHQeQFaftfKR99R2KsMHcHJr9z9eT-QS6bTxegIVBdf-hDM6LmyYUcq2AzNyZoB9EaBHYSQploxk3kzl4ohwdWzALuORD4IRTLAreA3XsO6QfI-hiYiKJaD6xqByB8_QKUm0wCxmo_RlEMzmFq25Nxj6wOKaJyNJT-bjC1n5dcjYX4d2p3Vgk8dELElkXTlsuDHeEA9qcffvOkIHEfE3BpQaTOt3HoNDCIsmYGm0pG',
-	},
-	{
-		id: '2',
-		name: 'Chronos Watch Series 7',
-		price: 450,
-		image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBuyyvebdBAFwlc6KaxcJ5UUhJCX5alLjYaWzfYv2QVQZ9JBtuyxATp73vBP4zA28RTMnudbTMZL-tTyxZH_zSKeDeZsza2MCksQ0V1MVE0wycI32naSQsV1m6qQkj30UgHwlz2KWSC9u9uNZkjKmfpfhPL2NwwE3hvSs5Is6l9iwzKmXFjcO6vRuYlaY1ZkHUHK8F44M844QPB9k-GLZ9EObNjq5Atr661Ne8EkFpfTIeMRJfp4shPMsl1oVcj2K26yomItp-JQsEr',
-		isNew: true,
-	},
-	{
-		id: '3',
-		name: 'Lumina Lens 85mm f/1.4',
-		price: 899,
-		image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAAxRKJShrmA1IaPgjsQpGZ9YZpkLcBQU18TA2OQVazGIF9ijjhTUKqHf1IEYM6_d4blJtlpcbJYzAOLxhnq9dpauoGGxokE559Vbav9kLIFdK_lKYCZk-nKooTaC6eswc5ii33yNOD-Py4BZmBuKHOQ3twGsOEM1ShioQhcpMUGB68UcJknaKN5EbzJ5v0E7ugxkxM9-fcstBhfdvsaYA6yD_9Ht9qyQLDXnvyh9b0zzq4yiOqLcBRNOpU4AB0-OnlKrlRYUGhIpPE',
-	},
-];
 
 export default function HomeScreen() {
 	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [searchText, setSearchText] = useState('');
 	const router = useRouter();
+
+	// Fetch products from FakeStore API
+	const { data: apiProducts = [], isLoading } = useGetProductsQuery();
+
+	// Transform API products to UI format
+	const products = useMemo(() => {
+		let result = apiProducts.map((product) => ({
+			id: product.id.toString(),
+			name: product.title,
+			price: Math.round(product.price),
+			originalPrice: null,
+			image: product.image,
+			isNew: false,
+			category: product.category,
+		}));
+
+		// Filter by selected category
+		if (selectedCategory !== 'All') {
+			result = result.filter((p) => p.category === selectedCategory);
+		}
+
+		return result.slice(0, 6); // Show only 6 products on home tab
+	}, [apiProducts, selectedCategory]);
 
 	// Flash sale end time (configurable). Default starts at ~04:28:12 from now
 	const FLASH_SALE_END = new Date(Date.now() + (4 * 3600 + 28 * 60 + 12) * 1000);
@@ -192,59 +194,71 @@ export default function HomeScreen() {
 
 			{/* Products Grid */}
 			<View style={styles.productsGrid}>
-				{PRODUCTS.map((product) => (
-					<TouchableOpacity
-						key={product.id}
-						style={styles.productCard}
-						activeOpacity={0.92}
-						onPress={() => {
-							const q = `?name=${encodeURIComponent(product.name)}&price=${encodeURIComponent(String(product.price))}&image=${encodeURIComponent(product.image || '')}&description=${encodeURIComponent((product as any).description || '')}`;
-							router.push(`/product/${product.id}${q}`);
-						}}
-					>
-						<View style={styles.productImageContainer}>
-							{product.isNew && (
-								<View style={styles.newBadge}>
-									<Text style={styles.newBadgeText}>NEW</Text>
+				{isLoading ? (
+					// Show skeleton loaders while loading
+					Array.from({ length: 6 }).map((_, index) => (
+						<View key={`skeleton-${index}`} style={styles.productCard}>
+							<View style={[styles.productImageContainer, styles.skeletonImage]} />
+							<View style={styles.skeletonContainer}>
+								<View style={[styles.skeletonBar, { width: '75%', height: 16 }]} />
+								<View style={[styles.skeletonBar, { width: '50%', height: 12, marginTop: 8 }]} />
+								<View style={styles.skeletonFooter}>
+									<View style={[styles.skeletonBar, { width: 40, height: 20 }]} />
+									<View style={[styles.skeletonBar, { width: 32, height: 32, borderRadius: 16 }]} />
 								</View>
-							)}
-							<TouchableOpacity style={styles.favoriteBtn}>
-								<MaterialCommunityIcons name="heart" size={18} color="#fff" />
-							</TouchableOpacity>
-							<Image
-								source={{ uri: product.image }}
-								style={styles.productImage}
-							/>
-				
-						</View>
-						<Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
-						<View style={styles.productFooter}>
-							<View style={styles.priceWrap}>
-								{product.originalPrice && (
-									<Text style={styles.originalPrice}>
-										${product.originalPrice}
-									</Text>
-								)}
-								<Text style={styles.productPrice}>${product.price}</Text>
 							</View>
-							<TouchableOpacity style={styles.addBtn}>
-								<MaterialCommunityIcons name="plus" size={18} color="#fff" />
-							</TouchableOpacity>
 						</View>
-					</TouchableOpacity>
-				))}
-				{/* Skeleton Loader Card */}
-				<View style={styles.productCard}>
-					<View style={[styles.productImageContainer, styles.skeletonImage]} />
-					<View style={styles.skeletonContainer}>
-						<View style={[styles.skeletonBar, { width: '75%', height: 16 }]} />
-						<View style={[styles.skeletonBar, { width: '50%', height: 12, marginTop: 8 }]} />
-						<View style={styles.skeletonFooter}>
-							<View style={[styles.skeletonBar, { width: 40, height: 20 }]} />
-							<View style={[styles.skeletonBar, { width: 32, height: 32, borderRadius: 16 }]} />
-						</View>
-					</View>
-				</View>
+					))
+				) : (
+					products.map((product) => (
+						<TouchableOpacity
+							key={product.id}
+							style={styles.productCard}
+							activeOpacity={0.92}
+							onPress={() => {
+								router.push({
+									pathname: '/product/[id]',
+									params: {
+										id: product.id,
+										name: product.name,
+										price: product.price,
+										image: product.image,
+										originalPrice: product.originalPrice || '',
+									},
+								});
+							}}
+						>
+							<View style={styles.productImageContainer}>
+								{product.isNew && (
+									<View style={styles.newBadge}>
+										<Text style={styles.newBadgeText}>NEW</Text>
+									</View>
+								)}
+								<TouchableOpacity style={styles.favoriteBtn}>
+									<MaterialCommunityIcons name="heart-outline" size={18} color="#fff" />
+								</TouchableOpacity>
+								<Image
+									source={{ uri: product.image }}
+									style={styles.productImage}
+								/>
+							</View>
+							<Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
+							<View style={styles.productFooter}>
+								<View style={styles.priceWrap}>
+									{product.originalPrice && (
+										<Text style={styles.originalPrice}>
+											${product.originalPrice}
+										</Text>
+									)}
+									<Text style={styles.productPrice}>${product.price}</Text>
+								</View>
+								<TouchableOpacity style={styles.addBtn}>
+									<MaterialCommunityIcons name="plus" size={18} color="#fff" />
+								</TouchableOpacity>
+							</View>
+						</TouchableOpacity>
+					))
+				)}
 			</View>
 
 			<View style={styles.spacer} />
