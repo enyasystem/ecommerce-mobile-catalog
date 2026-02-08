@@ -9,9 +9,9 @@ import {
 	Image,
 	Dimensions,
 	SafeAreaView,
-	AsyncStorage,
 	FlatList,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
@@ -106,6 +106,7 @@ export default function SearchScreen() {
 	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [recentSearches, setRecentSearches] = useState<string[]>([]);
 	const [showResults, setShowResults] = useState(false);
+	const [error, setError] = useState<{ type: string; message: string } | null>(null);
 
 	// Load recent searches on mount
 	useEffect(() => {
@@ -114,17 +115,24 @@ export default function SearchScreen() {
 
 	const loadRecentSearches = async () => {
 		try {
+			setError(null);
 			const stored = await AsyncStorage.getItem('recentSearches');
 			if (stored) {
 				setRecentSearches(JSON.parse(stored));
 			}
 		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Failed to load recent searches';
+			setError({
+				type: 'load_error',
+				message: errorMessage,
+			});
 			console.error('Error loading recent searches:', error);
 		}
 	};
 
 	const saveRecentSearch = useCallback(async (query: string) => {
 		try {
+			setError(null);
 			const trimmedQuery = query.trim();
 			if (!trimmedQuery) return;
 
@@ -132,17 +140,33 @@ export default function SearchScreen() {
 			setRecentSearches(updated);
 			await AsyncStorage.setItem('recentSearches', JSON.stringify(updated));
 		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Failed to save search';
+			setError({
+				type: 'save_error',
+				message: errorMessage,
+			});
 			console.error('Error saving search:', error);
 		}
 	}, [recentSearches]);
 
 	const clearRecentSearches = async () => {
 		try {
+			setError(null);
 			setRecentSearches([]);
 			await AsyncStorage.removeItem('recentSearches');
 		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Failed to clear searches';
+			setError({
+				type: 'clear_error',
+				message: errorMessage,
+			});
 			console.error('Error clearing searches:', error);
 		}
+	};
+
+	const handleRetry = () => {
+		setError(null);
+		loadRecentSearches();
 	};
 
 	// Filter products based on search query and category
@@ -318,7 +342,27 @@ export default function SearchScreen() {
 				showsVerticalScrollIndicator={false}
 				contentContainerStyle={styles.contentContainer}
 			>
-				{showResults ? (
+				{/* Error State */}
+				{error && (
+					<View style={styles.errorContainer}>
+						<View style={styles.errorContent}>
+							<MaterialCommunityIcons
+								name="alert-circle"
+								size={48}
+								color="#ef4444"
+								style={styles.errorIcon}
+							/>
+							<Text style={styles.errorTitle}>Unable to load</Text>
+							<Text style={styles.errorMessage}>{error.message}</Text>
+							<TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
+								<MaterialCommunityIcons name="refresh" size={18} color="#fff" />
+								<Text style={styles.retryButtonText}>Retry</Text>
+							</TouchableOpacity>
+						</View>
+					</View>
+				)}
+
+				{!error && (
 					// Search Results
 					<View style={styles.resultsSection}>
 						<Text style={styles.resultsTitle}>
@@ -407,6 +451,8 @@ export default function SearchScreen() {
 							</View>
 						</View>
 					</>
+				)}
+				</>
 				)}
 			</ScrollView>
 		</SafeAreaView>
@@ -703,5 +749,52 @@ const styles = StyleSheet.create({
 		color: 'rgba(255,255,255,0.5)',
 		fontSize: 13,
 		marginTop: 4,
+	},
+	errorContainer: {
+		width: '100%',
+		paddingHorizontal: 16,
+		paddingVertical: 40,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	errorContent: {
+		width: '100%',
+		borderRadius: 20,
+		padding: 24,
+		backgroundColor: 'rgba(239, 68, 68, 0.1)',
+		borderWidth: 1,
+		borderColor: 'rgba(239, 68, 68, 0.3)',
+		alignItems: 'center',
+	},
+	errorIcon: {
+		marginBottom: 16,
+	},
+	errorTitle: {
+		fontSize: 18,
+		fontWeight: '700',
+		color: '#fff',
+		marginBottom: 8,
+		textAlign: 'center',
+	},
+	errorMessage: {
+		fontSize: 14,
+		color: 'rgba(255, 255, 255, 0.6)',
+		textAlign: 'center',
+		marginBottom: 20,
+		lineHeight: 20,
+	},
+	retryButton: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		paddingHorizontal: 24,
+		paddingVertical: 12,
+		backgroundColor: '#ef4444',
+		borderRadius: 12,
+		gap: 8,
+	},
+	retryButtonText: {
+		color: '#fff',
+		fontSize: 14,
+		fontWeight: '600',
 	},
 });

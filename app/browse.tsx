@@ -66,6 +66,7 @@ export default function BrowseScreen() {
 	const [searchText, setSearchText] = useState('');
 	const [showFilter, setShowFilter] = useState(false);
 	const [isRefreshing, setIsRefreshing] = useState(false);
+	const [error, setError] = useState<{ type: string; message: string } | null>(null);
 	const [appliedFilters, setAppliedFilters] = useState<{
 		categories: string[];
 		sortBy: string;
@@ -81,16 +82,30 @@ export default function BrowseScreen() {
 	// Handle pull-to-refresh
 	const onRefresh = async () => {
 		setIsRefreshing(true);
+		setError(null);
 		try {
 			// Simulate API call with a 1 second delay
+			// Uncomment the next line to test error handling
+			// throw new Error('Network error: Failed to fetch products');
+			
 			await new Promise((resolve) => setTimeout(resolve, 1000));
-			// In a real app, you would fetch fresh product data here
 			console.log('Products refreshed');
-		} catch (error) {
-			console.error('Error refreshing products:', error);
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+			setError({
+				type: 'load_error',
+				message: errorMessage,
+			});
+			console.error('Error refreshing products:', err);
 		} finally {
 			setIsRefreshing(false);
 		}
+	};
+
+	// Handle retry
+	const handleRetry = () => {
+		setError(null);
+		onRefresh();
 	};
 
 	// Filter and sort products based on applied filters
@@ -313,29 +328,51 @@ export default function BrowseScreen() {
 					)}
 				</View>
 
-				{/* Products Grid */}
-				<View style={styles.productsGrid}>
-					{filteredProducts.length > 0 ? (
-						filteredProducts.map((item) => (
-							<View key={item.id} style={styles.gridColumn}>
-								{renderProductCard({ item })}
-							</View>
-						))
-					) : (
-						<View style={styles.emptyStateContainer}>
+				{/* Error State */}
+				{error && (
+					<View style={styles.errorContainer}>
+						<View style={styles.errorContent}>
 							<MaterialCommunityIcons
-								name="magnify"
+								name="alert-circle"
 								size={48}
-								color="rgba(255, 255, 255, 0.3)"
-								style={styles.emptyIcon}
+								color="#ef4444"
+								style={styles.errorIcon}
 							/>
-							<Text style={styles.emptyText}>No products found</Text>
-							<Text style={styles.emptySubtext}>
-								Try adjusting your filters or search terms
-							</Text>
+							<Text style={styles.errorTitle}>Unable to load products</Text>
+							<Text style={styles.errorMessage}>{error.message}</Text>
+							<TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
+								<MaterialCommunityIcons name="refresh" size={18} color="#fff" />
+								<Text style={styles.retryButtonText}>Retry</Text>
+							</TouchableOpacity>
 						</View>
-					)}
-				</View>
+					</View>
+				)}
+
+				{/* Products Grid */}
+				{!error && (
+					<View style={styles.productsGrid}>
+						{filteredProducts.length > 0 ? (
+							filteredProducts.map((item) => (
+								<View key={item.id} style={styles.gridColumn}>
+									{renderProductCard({ item })}
+								</View>
+							))
+						) : (
+							<View style={styles.emptyStateContainer}>
+								<MaterialCommunityIcons
+									name="magnify"
+									size={48}
+									color="rgba(255, 255, 255, 0.3)"
+									style={styles.emptyIcon}
+								/>
+								<Text style={styles.emptyText}>No products found</Text>
+								<Text style={styles.emptySubtext}>
+									Try adjusting your filters or search terms
+								</Text>
+							</View>
+						)}
+					</View>
+				)}
 
 				<View style={styles.spacer} />
 			</ScrollView>
@@ -647,5 +684,52 @@ const styles = StyleSheet.create({
 		fontSize: 12,
 		fontWeight: '700',
 		color: '#2b6cee',
+	},
+	errorContainer: {
+		width: '100%',
+		paddingHorizontal: 20,
+		paddingVertical: 40,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	errorContent: {
+		width: '100%',
+		borderRadius: 20,
+		padding: 24,
+		backgroundColor: 'rgba(239, 68, 68, 0.1)',
+		borderWidth: 1,
+		borderColor: 'rgba(239, 68, 68, 0.3)',
+		alignItems: 'center',
+	},
+	errorIcon: {
+		marginBottom: 16,
+	},
+	errorTitle: {
+		fontSize: 18,
+		fontWeight: '700',
+		color: '#fff',
+		marginBottom: 8,
+		textAlign: 'center',
+	},
+	errorMessage: {
+		fontSize: 14,
+		color: 'rgba(255, 255, 255, 0.6)',
+		textAlign: 'center',
+		marginBottom: 20,
+		lineHeight: 20,
+	},
+	retryButton: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		paddingHorizontal: 24,
+		paddingVertical: 12,
+		backgroundColor: '#ef4444',
+		borderRadius: 12,
+		gap: 8,
+	},
+	retryButtonText: {
+		color: '#fff',
+		fontSize: 14,
+		fontWeight: '600',
 	},
 });
