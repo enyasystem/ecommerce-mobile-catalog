@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
 	View,
 	Text,
@@ -8,67 +8,26 @@ import {
 	TouchableOpacity,
 	Image,
 	Dimensions,
-	SafeAreaView,
 	RefreshControl,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import FilterModal from '../components/FilterModal';
 import ProductSkeleton from '../components/products/ProductSkeleton';
 import { useRouter } from 'expo-router';
+import { useGetProductsQuery } from '../features/products/productsAPI';
 
 const { width } = Dimensions.get('window');
 const cardWidth = width / 2 - 16;
 
-const categories = ['All', 'Audio', 'Wearables', 'Smart Home', 'Photography'];
-
-const products = [
-	{
-		id: '1',
-		name: 'Nexus Pro Wireless ANC',
-		price: 299,
-		originalPrice: 349,
-		image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAAyo8s8cOPxPs6GHiMbibuJRx5UhsJiRrngtKHQeQFaftfKR99R2KsMHcHJr9z9eT-QS6bTxegIVBdf-hDM6LmyYUcq2AzNyZoB9EaBHYSQploxk3kzl4ohwdWzALuORD4IRTLAreA3XsO6QfI-hiYiKJaD6xqByB8_QKUm0wCxmo_RlEMzmFq25Nxj6wOKaJyNJT-bjC1n5dcjYX4d2p3Vgk8dELElkXTlsuDHeEA9qcffvOkIHEfE3BpQaTOt3HoNDCIsmYGm0pG',
-		isFavorite: false,
-		isNew: false,
-	},
-	{
-		id: '2',
-		name: 'Chronos Watch Series 7',
-		price: 450,
-		originalPrice: null,
-		image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBuyyvebdBAFwlc6KaxcJ5UUhJCX5alLjYaWzfYv2QVQZ9JBtuyxATp73vBP4zA28RTMnudbTMZL-tTyxZH_zSKeDeZsza2MCksQ0V1MVE0wycI32naSQsV1m6qQkj30UgHwlz2KWSC9u9uNZkjKmfpfhPL2NwwE3hvSs5Is6l9iwzKmXFjcO6vRuYlaY1ZkHUHK8F44M844QPB9k-GLZ9EObNjq5Atr661Ne8EkFpfTIeMRJfp4shPMsl1oVcj2K26yomItp-JQsEr',
-		isFavorite: false,
-		isNew: true,
-	},
-	{
-		id: '3',
-		name: 'Lumina Lens 85mm f/1.4',
-		price: 899,
-		originalPrice: null,
-		image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAAxRKJShrmA1IaPgjsQpGZ9YZpkLcBQU18TA2OQVazGIF9ijjhTUKqHf1IEYM6_d4blJtlpcbJYzAOLxhnq9dpauoGGxokE559Vbav9kLIFdK_lKYCZk-nKooTaC6eswc5ii33yNOD-Py4BZmBuKHOQ3twGsOEM1ShioQhcpMUGB68UcJknaKN5EbzJ5v0E7ugxkxM9-fcstBhfdvsaYA6yD_9Ht9qyQLDXnvyh9b0zzq4yiOqLcBRNOpU4AB0-OnlKrlRYUGhIpPE',
-		isFavorite: false,
-		isNew: false,
-	},
-	{
-		id: '4',
-		name: 'CyberMouse X1 Elite',
-		price: 99,
-		originalPrice: 120,
-		image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAa3ZvDJ0LK5F3IdCoaMngueykmcGgl4bMHNnk17Bn279dr2sJoibpkBV1_zCnhFj0XJGgnkUIQ9DZwY2SL87SV1Lma4yEVW3uPFf_OhVgns6yAT5pRyCtw5GCc2sUkLf_e2rMeXDOB-Ik2MYxj5ROxZGo8_QMHke3dYf8Z47xDibjuTPLRp-V41lOJ7i8OZdyzYSMmke_iKay9Et3QaJZJ7SFm2f4eiczY967TfcJCLLElLmo0Z97dddJiycQzN4U5x7h-rZflmp9a',
-		isFavorite: true,
-		isNew: false,
-	},
-];
+const categories = ['All', 'electronics', "men's clothing", "women's clothing", 'jewelery'];
 
 export default function BrowseScreen() {
 	const router = useRouter();
 	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [searchText, setSearchText] = useState('');
 	const [showFilter, setShowFilter] = useState(false);
-	const [isLoading, setIsLoading] = useState(true);
-	const [isRefreshing, setIsRefreshing] = useState(false);
-	const [error, setError] = useState<{ type: string; message: string } | null>(null);
 	const [appliedFilters, setAppliedFilters] = useState<{
 		categories: string[];
 		sortBy: string;
@@ -78,51 +37,45 @@ export default function BrowseScreen() {
 		categories: ['All'],
 		sortBy: 'popularity',
 		brands: [],
-		priceRange: [50, 1200],
+		priceRange: [0, 1000],
 	});
 
-	// Simulate initial load on mount
-	useEffect(() => {
-		const timer = setTimeout(() => {
-			setIsLoading(false);
-		}, 1200);
-		return () => clearTimeout(timer);
-	}, []);
+	// Fetch products from FakeStore API
+	const { data: apiProducts = [], isLoading, isFetching, error, refetch } = useGetProductsQuery();
+
+	// Transform API products to UI format
+	const products = useMemo(() => {
+		return apiProducts.map((product) => ({
+			id: product.id.toString(),
+			name: product.title,
+			price: Math.round(product.price),
+			originalPrice: null,
+			image: product.image,
+			isFavorite: false,
+			isNew: false,
+			category: product.category,
+			rating: product.rating,
+		}));
+	}, [apiProducts]);
 
 	// Handle pull-to-refresh
 	const onRefresh = async () => {
-		setIsRefreshing(true);
-		setIsLoading(true);
-		setError(null);
-		try {
-			// Simulate API call with a 1 second delay
-			// Uncomment the next line to test error handling
-			// throw new Error('Network error: Failed to fetch products');
-			
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-			console.log('Products refreshed');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-			setError({
-				type: 'load_error',
-				message: errorMessage,
-			});
-			console.error('Error refreshing products:', err);
-		} finally {
-			setIsRefreshing(false);
-			setIsLoading(false);
-		}
+		await refetch();
 	};
 
 	// Handle retry
 	const handleRetry = () => {
-		setError(null);
-		onRefresh();
+		refetch();
 	};
 
 	// Filter and sort products based on applied filters
 	const filteredProducts = useMemo(() => {
 		let result = [...products];
+
+		// Filter by category
+		if (selectedCategory !== 'All') {
+			result = result.filter((p) => p.category === selectedCategory);
+		}
 
 		// Filter by price range
 		result = result.filter((p) => {
@@ -141,14 +94,11 @@ export default function BrowseScreen() {
 		// Sort products
 		switch (appliedFilters.sortBy) {
 			case 'popularity':
-				// Keep default order (already popular items first)
+				// Sort by rating (highest first)
+				result.sort((a, b) => (b.rating?.rate || 0) - (a.rating?.rate || 0));
 				break;
 			case 'newest':
-				// Sort with newest (isNew) first
-				result.sort((a, b) => {
-					if (a.isNew === b.isNew) return 0;
-					return a.isNew ? -1 : 1;
-				});
+				// Keep default order
 				break;
 			case 'priceLowHigh':
 				result.sort((a, b) => a.price - b.price);
@@ -159,7 +109,7 @@ export default function BrowseScreen() {
 		}
 
 		return result;
-	}, [appliedFilters, searchText]);
+	}, [appliedFilters, searchText, selectedCategory, products]);
 
 	const renderProductCard = ({ item }: { item: (typeof products)[0] }) => (
 		<TouchableOpacity
@@ -282,7 +232,7 @@ export default function BrowseScreen() {
 				showsVerticalScrollIndicator={false}
 				refreshControl={
 					<RefreshControl
-						refreshing={isRefreshing}
+						refreshing={isFetching}
 						onRefresh={onRefresh}
 						tintColor="#2badee"
 						titleColor="#2badee"
@@ -324,15 +274,17 @@ export default function BrowseScreen() {
 					<Text style={styles.resultsText}>
 						Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
 					</Text>
-					{(appliedFilters.priceRange[0] !== 50 || appliedFilters.priceRange[1] !== 1200 || appliedFilters.sortBy !== 'popularity') && (
+					{(appliedFilters.priceRange[0] !== 0 || appliedFilters.priceRange[1] !== 1000 || appliedFilters.sortBy !== 'popularity' || selectedCategory !== 'All') && (
 						<TouchableOpacity
 							onPress={() => {
 								setAppliedFilters({
 									categories: ['All'],
 									sortBy: 'popularity',
 									brands: [],
-									priceRange: [50, 1200],
+									priceRange: [0, 1000],
 								});
+								setSelectedCategory('All');
+								setSearchText('');
 							}}
 						>
 							<Text style={styles.resetFiltersText}>Reset filters</Text>
@@ -351,7 +303,9 @@ export default function BrowseScreen() {
 								style={styles.errorIcon}
 							/>
 							<Text style={styles.errorTitle}>Unable to load products</Text>
-							<Text style={styles.errorMessage}>{error.message}</Text>
+							<Text style={styles.errorMessage}>
+								Failed to fetch products from the server. Please check your connection and try again.
+							</Text>
 							<TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
 								<MaterialCommunityIcons name="refresh" size={18} color="#fff" />
 								<Text style={styles.retryButtonText}>Retry</Text>

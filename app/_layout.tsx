@@ -5,6 +5,8 @@ import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Provider } from 'react-redux';
+import { store } from '../store/index';
 
 function CustomTabBarContent({ state, descriptors, navigation }: any) {
   const insets = useSafeAreaInsets();
@@ -138,64 +140,66 @@ function CustomTabBar(props: any) {
 
 export default function RootLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: { display: 'none' },
-      }}
-      tabBar={CustomTabBar}
-    >
-      <Tabs.Screen
-        name="(tabs)/index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="home" size={24} color={color} />
-          ),
-          tabBarLabel: 'Home',
+    <Provider store={store}>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarStyle: { display: 'none' },
         }}
-      />
-      <Tabs.Screen
-        name="browse"
-        options={{
-          title: 'Browse',
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="view-grid" size={24} color={color} />
-          ),
-          tabBarLabel: 'Browse',
-        }}
-      />
-      <Tabs.Screen
-        name="cart"
-        options={{
-          title: 'Cart',
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="shopping" size={24} color={color} />
-          ),
-          tabBarLabel: 'Cart',
-        }}
-      />
-      <Tabs.Screen
-        name="saved"
-        options={{
-          title: 'Saved',
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="heart" size={24} color={color} />
-          ),
-          tabBarLabel: 'Saved',
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="account" size={24} color={color} />
-          ),
-          tabBarLabel: 'Profile',
-        }}
-      />
-    </Tabs>
+        tabBar={CustomTabBar}
+      >
+        <Tabs.Screen
+          name="(tabs)/index"
+          options={{
+            title: 'Home',
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons name="home" size={24} color={color} />
+            ),
+            tabBarLabel: 'Home',
+          }}
+        />
+        <Tabs.Screen
+          name="browse"
+          options={{
+            title: 'Browse',
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons name="view-grid" size={24} color={color} />
+            ),
+            tabBarLabel: 'Browse',
+          }}
+        />
+        <Tabs.Screen
+          name="cart"
+          options={{
+            title: 'Cart',
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons name="shopping" size={24} color={color} />
+            ),
+            tabBarLabel: 'Cart',
+          }}
+        />
+        <Tabs.Screen
+          name="saved"
+          options={{
+            title: 'Saved',
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons name="heart" size={24} color={color} />
+            ),
+            tabBarLabel: 'Saved',
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: 'Profile',
+            tabBarIcon: ({ color }) => (
+              <MaterialCommunityIcons name="account" size={24} color={color} />
+            ),
+            tabBarLabel: 'Profile',
+          }}
+        />
+      </Tabs>
+    </Provider>
   );
 }
 

@@ -8,92 +8,20 @@ import {
 	TouchableOpacity,
 	Image,
 	Dimensions,
-	SafeAreaView,
 	FlatList,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
+import { useGetProductsQuery } from '../../features/products/productsAPI';
+import ProductSkeleton from '../../components/products/ProductSkeleton';
 
 const { width } = Dimensions.get('window');
 const cardWidth = width - 40;
 
-// Product data - shared with browse screen
-const products = [
-	{
-		id: '1',
-		name: 'Nexus Pro Wireless ANC',
-		price: 299,
-		originalPrice: 349,
-		image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAAyo8s8cOPxPs6GHiMbibuJRx5UhsJiRrngtKHQeQFaftfKR99R2KsMHcHJr9z9eT-QS6bTxegIVBdf-hDM6LmyYUcq2AzNyZoB9EaBHYSQploxk3kzl4ohwdWzALuORD4IRTLAreA3XsO6QfI-hiYiKJaD6xqByB8_QKUm0wCxmo_RlEMzmFq25Nxj6wOKaJyNJT-bjC1n5dcjYX4d2p3Vgk8dELElkXTlsuDHeEA9qcffvOkIHEfE3BpQaTOt3HoNDCIsmYGm0pG',
-		isFavorite: false,
-		isNew: false,
-		category: 'Audio',
-	},
-	{
-		id: '2',
-		name: 'Chronos Watch Series 7',
-		price: 450,
-		originalPrice: null,
-		image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBuyyvebdBAFwlc6KaxcJ5UUhJCX5alLjYaWzfYv2QVQZ9JBtuyxATp73vBP4zA28RTMnudbTMZL-tTyxZH_zSKeDeZsza2MCksQ0V1MVE0wycI32naSQsV1m6qQkj30UgHwlz2KWSC9u9uNZkjKmfpfhPL2NwwE3hvSs5Is6l9iwzKmXFjcO6vRuYlaY1ZkHUHK8F44M844QPB9k-GLZ9EObNjq5Atr661Ne8EkFpfTIeMRJfp4shPMsl1oVcj2K26yomItp-JQsEr',
-		isFavorite: false,
-		isNew: true,
-		category: 'Wearables',
-	},
-	{
-		id: '3',
-		name: 'Lumina Lens 85mm f/1.4',
-		price: 899,
-		originalPrice: null,
-		image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAAxRKJShrmA1IaPgjsQpGZ9YZpkLcBQU18TA2OQVazGIF9ijjhTUKqHf1IEYM6_d4blJtlpcbJYzAOLxhnq9dpauoGGxokE559Vbav9kLIFdK_lKYCZk-nKooTaC6eswc5ii33yNOD-Py4BZmBuKHOQ3twGsOEM1ShioQhcpMUGB68UcJknaKN5EbzJ5v0E7ugxkxM9-fcstBhfdvsaYA6yD_9Ht9qyQLDXnvyh9b0zzq4yiOqLcBRNOpU4AB0-OnlKrlRYUGhIpPE',
-		isFavorite: false,
-		isNew: false,
-		category: 'Photography',
-	},
-	{
-		id: '4',
-		name: 'CyberMouse X1 Elite',
-		price: 99,
-		originalPrice: 120,
-		image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAa3ZvDJ0LK5F3IdCoaMngueykmcGgl4bMHNnk17Bn279dr2sJoibpkBV1_zCnhFj0XJGgnkUIQ9DZwY2SL87SV1Lma4yEVW3uPFf_OhVgns6yAT5pRyCtw5GCc2sUkLf_e2rMeXDOB-Ik2MYxj5ROxZGo8_QMHke3dYf8Z47xDibjuTPLRp-V41lOJ7i8OZdyzYSMmke_iKay9Et3QaJZJ7SFm2f4eiczY967TfcJCLLElLmo0Z97dddJiycQzN4U5x7h-rZflmp9a',
-		isFavorite: true,
-		isNew: false,
-		category: 'Audio',
-	},
-	{
-		id: '5',
-		name: 'Sony WH-1000XM5',
-		price: 348,
-		originalPrice: null,
-		image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDNz2_Qy4sndx6q50agaIzw-LvL65ohGE6ZR8Sqods9jJx4SwoFHH6kpGLSxkgMongO6oGlDQV4w9FdiJEtWnw8W3t1c1ZXpZcCgE8LZH5n-HgSVfvEKQvM7WUU_e3r1_IGNPGTYUgvOa2Xom2j2IXNWxag4vElJ-gV3MiM25-uoFyEUeIBQj2GxNdZOw8bJrcN1QS5dEIpbGPC7AOdowZmVdtWdgmllJVR9ZtfLfDL96z1_OB4TbOD0Pukl5AHFSlnEWDTbcAQAtRN',
-		isFavorite: false,
-		isNew: false,
-		category: 'Audio',
-	},
-	{
-		id: '6',
-		name: 'AirPods Pro Gen 2',
-		price: 249,
-		originalPrice: null,
-		image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA_zcz0K41Fkfw8JUBZhWXNX-hUQbQ5qWYEjndAx1DLvN9erhPCwQ5B2QDm4eGqbyfgz6y1o4Ps43ROQwFtOAG7kxsso1Lb4Pg1leo1odvMWDM9aDyDjxfCIgRBoqMpmWP8vaw2ZD7fkPXwCbSKwFJ6Ph1HAqqWqpoZHxXAJvsZZyPNN8Bj0luVqFlwXepjWv5E466Z9XNbRYgRoctDOG2MQIwQY8NxY-hYsi7EFWPpRtdfgHkPUD-VJGpOm0HN98yxUdC6byYXJNm1',
-		isFavorite: false,
-		isNew: false,
-		category: 'Audio',
-	},
-	{
-		id: '7',
-		name: 'Galaxy Watch 6',
-		price: 249,
-		originalPrice: 299,
-		image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCoL1oIJ-IoTiCcmypQw5JFVWI92EwHCIBagkn-YiPg2jfUkke-gG67sB6oDgjgSV2OpSStl3WUfGDCozW7JWmU4_8dINjXEH7Rz6OwNkuCTGpJXUvpjfD3oZTguUCdIYtyvpHDwbUN7lkIY_Vucl68ZXCXuzOQHcTpUdWb0klShmhKTij2vWMcPI2KpQWjSP7xoEK4KGZwJ2yGMCq5KX5L8ZSMgIiUVTcE-dI1FidSo88wczV8wJj7DAONS_jhubF87YUTKkW_8QAu',
-		isFavorite: false,
-		isNew: false,
-		category: 'Wearables',
-	},
-];
-
-const categories = ['All', 'Electronics', 'Fashion', 'Home'];
+const categories = ['All', 'electronics', "men's clothing", "women's clothing", 'jewelery'];
 const trendingTopics = [
 	{ id: '1', name: 'Cyberpunk Aesthetics', icon: 'trending-up', color: '#2badee' },
 	{ id: '2', name: 'Fast Chargers', icon: 'lightning-bolt', color: '#10b981' },
@@ -107,6 +35,23 @@ export default function SearchScreen() {
 	const [recentSearches, setRecentSearches] = useState<string[]>([]);
 	const [showResults, setShowResults] = useState(false);
 	const [error, setError] = useState<{ type: string; message: string } | null>(null);
+
+	// Fetch products from FakeStore API
+	const { data: apiProducts = [], isLoading, error: apiError } = useGetProductsQuery();
+
+	// Transform API products to UI format
+	const products = useMemo(() => {
+		return apiProducts.map((product) => ({
+			id: product.id.toString(),
+			name: product.title,
+			price: Math.round(product.price),
+			originalPrice: null,
+			image: product.image,
+			isFavorite: false,
+			isNew: false,
+			category: product.category,
+		}));
+	}, [apiProducts]);
 
 	// Load recent searches on mount
 	useEffect(() => {
@@ -185,7 +130,7 @@ export default function SearchScreen() {
 		}
 
 		return result;
-	}, [searchQuery, selectedCategory]);
+	}, [searchQuery, selectedCategory, products]);
 
 	const handleSearch = (query: string) => {
 		setSearchQuery(query);
@@ -254,10 +199,10 @@ export default function SearchScreen() {
 
 					<View style={styles.priceContainer}>
 						<View>
-							{item.originalPrice && (
-								<Text style={styles.originalPrice}>${item.originalPrice.toFixed(2)}</Text>
-							)}
-							<Text style={styles.price}>${item.price.toFixed(2)}</Text>
+							{item.originalPrice ? (
+								<Text style={styles.originalPrice}>${(item.originalPrice as number).toFixed(2)}</Text>
+							) : null}
+							<Text style={styles.price}>${item.price}</Text>
 						</View>
 						<TouchableOpacity style={styles.addButton}>
 							<MaterialCommunityIcons
@@ -369,7 +314,16 @@ export default function SearchScreen() {
 							<Text style={styles.resultsTitle}>
 								Results for "{searchQuery}" ({filteredProducts.length})
 							</Text>
-							{filteredProducts.length > 0 ? (
+							{isLoading ? (
+								// Show skeleton loaders while loading
+								<View style={styles.productsList}>
+									{Array.from({ length: 3 }).map((_, index) => (
+										<View key={`skeleton-${index}`}>
+											<ProductSkeleton />
+										</View>
+									))}
+								</View>
+							) : filteredProducts.length > 0 ? (
 								<View style={styles.productsList}>
 									{filteredProducts.map((item) => (
 										<View key={item.id}>
