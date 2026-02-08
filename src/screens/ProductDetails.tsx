@@ -12,10 +12,12 @@ import { Image } from 'expo-image';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import PRODUCTS, { type Product } from '../data/products';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ProductDetailsScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const id = params.id;
 
   const product = useMemo(() => {
@@ -129,7 +131,7 @@ export default function ProductDetailsScreen() {
           </View>
 
           {/* Size selector */}
-          <View style={styles.section}>
+          <View style={[styles.section, styles.sizeSection]}>
             <View style={styles.sizeHeader}>
               <Text style={styles.sectionLabel}>Select Size</Text>
               <TouchableOpacity>
@@ -157,18 +159,19 @@ export default function ProductDetailsScreen() {
             />
           </View>
 
-          <View style={{ height: 140 }} />
+          <View style={{ height: insets.bottom + 160 }} />
         </View>
       </ScrollView>
 
       {/* Fixed Bottom Area */}
       <View style={styles.bottomWrap} pointerEvents="box-none">
-        <TouchableOpacity style={styles.buyBtn}>
+        <View style={[styles.buyGlow, { bottom: insets.bottom + 100 }]} />
+        <TouchableOpacity style={[styles.buyBtn, { bottom: insets.bottom + 104 }]}>
           <MaterialCommunityIcons name="shopping" size={18} color="#fff" />
           <Text style={styles.buyText}>Buy Now</Text>
         </TouchableOpacity>
 
-        <View style={styles.floatingTabs}>
+        <View style={[styles.floatingTabs, { bottom: insets.bottom + 16 }] }>
           <TouchableOpacity style={styles.tabBtn}>
             <MaterialCommunityIcons name="home" size={22} color="rgba(255,255,255,0.6)" />
           </TouchableOpacity>
@@ -276,6 +279,7 @@ const styles = StyleSheet.create({
   colorCircle: { width: 40, height: 40, borderRadius: 20, borderColor: '#fff', borderWidth: 0.5 },
   colorSelected: { borderWidth: 2, borderColor: '#2b6cee', shadowColor: '#2b6cee', shadowOpacity: 0.4, shadowRadius: 12, elevation: 12 },
   sizeHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  sizeSection: { marginTop: 10 },
   sizeGuide: { color: '#2b6cee', fontWeight: '600' },
   sizesList: { paddingVertical: 6 },
   sizeBtn: { minWidth: 56, height: 56, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
@@ -284,10 +288,10 @@ const styles = StyleSheet.create({
   sizeTextActive: { color: '#fff', fontWeight: '800' },
   sizeText: { color: 'rgba(255,255,255,0.7)', fontWeight: '700' },
   bottomWrap: { position: 'absolute', left: 0, right: 0, bottom: 0, padding: 16, alignItems: 'center', pointerEvents: 'box-none' as any },
-  buyGlow: { position: 'absolute', bottom: 32, width: Math.min(560, width - 48), height: 56, borderRadius: 999, backgroundColor: '#2b6cee', opacity: 0.12, shadowColor: '#2b6cee', shadowOpacity: 0.6, shadowRadius: 40, shadowOffset: { width: 0, height: 24 }, elevation: 12, zIndex: 20 },
-  buyBtn: { width: '100%', maxWidth: 560, height: 56, backgroundColor: '#2b6cee', borderRadius: 999, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, elevation: 14, zIndex: 30, marginBottom: 8 },
+  buyGlow: { position: 'absolute', bottom: 156, width: Math.min(440, width - 48), height: 44, borderRadius: 999, backgroundColor: '#2b6cee', opacity: 0.12, shadowColor: '#2b6cee', shadowOpacity: 0.6, shadowRadius: 32, shadowOffset: { width: 0, height: 18 }, elevation: 12, zIndex: 20 },
+  buyBtn: { position: 'absolute', bottom: 160, left: 24, right: 24, maxWidth: 440, height: 44, backgroundColor: '#2b6cee', borderRadius: 999, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, elevation: 14, zIndex: 30 },
   buyText: { color: '#fff', fontWeight: '800', marginLeft: 8 },
-  floatingTabs: { position: 'absolute', bottom: 8, marginTop: 12, width: Math.min(360, width - 32), height: 64, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.03)', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 8, shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 12, elevation: 10, zIndex: 10 },
+  floatingTabs: { position: 'absolute', bottom: 16, marginTop: 12, width: Math.min(360, width - 32), height: 64, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.03)', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 8, shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 12, elevation: 10, zIndex: 10 },
   tabBtn: { flex: 1, alignItems: 'center', justifyContent: 'center', height: '100%' },
   centerAction: { position: 'relative', top: -20, alignItems: 'center', justifyContent: 'center' },
   centerBtn: { width: 56, height: 56, borderRadius: 28, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', shadowColor: '#fff', shadowOpacity: 0.6, shadowRadius: 18, elevation: 10 },
