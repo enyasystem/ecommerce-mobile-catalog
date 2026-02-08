@@ -121,12 +121,16 @@ export default function HomeScreen() {
 				</TouchableOpacity>
 			</View>
 
+			{/* Main ScrollView Content */}
+			<ScrollView showsVerticalScrollIndicator={false} style={styles.mainScroll} contentContainerStyle={styles.scrollContent}>
+
 			{/* Category Filter */}
 			<ScrollView
 				horizontal
 				showsHorizontalScrollIndicator={false}
 				style={styles.categoryScroll}
 				contentContainerStyle={styles.categoryContent}
+				scrollEnabled={false}
 			>
 				{CATEGORIES.map((cat) => (
 					<TouchableOpacity
@@ -149,9 +153,6 @@ export default function HomeScreen() {
 					</TouchableOpacity>
 				))}
 			</ScrollView>
-
-			{/* Main ScrollView Content */}
-			<ScrollView showsVerticalScrollIndicator={false} style={styles.mainScroll}>
 
 			{/* Hero Banner */}
 			<View style={styles.heroBanner}>
@@ -693,8 +694,12 @@ const styles = StyleSheet.create({
 		backgroundColor: 'rgba(5,5,5,0.8)',
 		borderBottomWidth: 1,
 		borderBottomColor: 'rgba(255, 255, 255, 0.05)',
-		zIndex: 9,
+		zIndex: 100,
 		minHeight: 68,
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		right: 0,
 	},
 	categoryContent: {
 		paddingHorizontal: 16,
@@ -733,7 +738,8 @@ const styles = StyleSheet.create({
 	},
 	heroBanner: {
 		marginHorizontal: 20,
-		marginVertical: 20,
+		marginTop: 0,
+		marginBottom: 16,
 		borderRadius: 28,
 		overflow: 'hidden',
 		height: 200,
@@ -1030,6 +1036,9 @@ const styles = StyleSheet.create({
 	},
 	mainScroll: {
 		flex: 1,
+	},
+	scrollContent: {
+		paddingTop: 68,
 	},
 	spacer: {
 		height: 140,
