@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
 	Modal,
 	View,
@@ -7,9 +7,8 @@ import {
 	TouchableOpacity,
 	ScrollView,
 	SafeAreaView,
-	Dimensions,
-	Animated,
 	PanResponder,
+	LayoutRectangle,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -44,6 +43,64 @@ export default function FilterModal({ visible, onClose, onApply }: FilterModalPr
 	const [selectedSort, setSelectedSort] = useState<'popularity' | 'newest' | 'priceLowHigh' | 'priceHighLow'>('popularity');
 	const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
 	const [priceRange, setPriceRange] = useState<[number, number]>([50, 1200]);
+
+	const MIN_PRICE = 0;
+	const MAX_PRICE = 2000;
+	const THUMB_SIZE = 20;
+
+	const sliderTrackRef = useRef<LayoutRectangle | null>(null);
+
+	// Calculate position from price
+	const priceToPosition = (price: number): number => {
+		if (!sliderTrackRef.current) return 0;
+		const trackWidth = sliderTrackRef.current.width;
+		const ratio = (price - MIN_PRICE) / (MAX_PRICE - MIN_PRICE);
+		return ratio * trackWidth;
+	};
+
+	// Calculate price from position
+	const positionToPrice = (position: number): number => {
+		if (!sliderTrackRef.current) return MIN_PRICE;
+		const trackWidth = sliderTrackRef.current.width;
+		const ratio = Math.max(0, Math.min(1, position / trackWidth));
+		return Math.round(ratio * (MAX_PRICE - MIN_PRICE) + MIN_PRICE);
+	};
+
+	// Min thumb responder
+	const minThumbResponder = useRef(
+		PanResponder.create({
+			onStartShouldSetPanResponder: () => true,
+			onMoveShouldSetPanResponder: () => true,
+			onPanResponderMove: (evt, { dx }) => {
+				const currentPos = priceToPosition(priceRange[0]);
+				const newPos = Math.max(0, currentPos + dx);
+				const newPrice = positionToPrice(newPos);
+				const maxPrice = priceRange[1];
+
+				if (newPrice <= maxPrice) {
+					setPriceRange([newPrice, maxPrice]);
+				}
+			},
+		})
+	).current;
+
+	// Max thumb responder
+	const maxThumbResponder = useRef(
+		PanResponder.create({
+			onStartShouldSetPanResponder: () => true,
+			onMoveShouldSetPanResponder: () => true,
+			onPanResponderMove: (evt, { dx }) => {
+				const currentPos = priceToPosition(priceRange[1]);
+				const newPos = Math.min(sliderTrackRef.current?.width || 300, currentPos + dx);
+				const newPrice = positionToPrice(newPos);
+				const minPrice = priceRange[0];
+
+				if (newPrice >= minPrice) {
+					setPriceRange([minPrice, newPrice]);
+				}
+			},
+		})
+	).current;
 
 	const toggleBrand = (brand: string) => {
 		setSelectedBrands((prev) =>
@@ -126,16 +183,61 @@ export default function FilterModal({ visible, onClose, onApply }: FilterModalPr
 							</Text>
 						</View>
 						<View style={styles.sliderContainer}>
-							<View style={styles.sliderTrack}>
-								<View style={styles.sliderFill} />
-								<View style={styles.sliderThumb} />
-								<View style={[styles.sliderThumb, { right: '30%' }]} />
+							<View
+								style={styles.sliderTrack}
+								onLayout={(evt) => {
+									sliderTrackRef.current = evt.nativeEvent.layout;
+								}}
+							>
+								{/* Slider background */}
+								<View style={styles.sliderBackground} />
+
+								{/* Slider fill (colored range) */}
+								<View
+									style={[
+										styles.sliderFill,
+										{
+											left: `${(priceRange[0] / MAX_PRICE) * 100}%`,
+											right: `${100 - (priceRange[1] / MAX_PRICE) * 100}%`,
+										},
+									]}
+								/>
+
+								{/* Min thumb */}
+								<View
+									style={[
+										styles.sliderThumb,
+										{
+											left: `${(priceRange[0] / MAX_PRICE) * 100}%`,
+											marginLeft: -THUMB_SIZE / 2,
+										},
+									]}
+									{...minThumbResponder.panHandlers}
+								>
+									<View style={styles.thumbInner} />
+								</View>
+
+								{/* Max thumb */}
+								<View
+									style={[
+										styles.sliderThumb,
+										{
+											left: `${(priceRange[1] / MAX_PRICE) * 100}%`,
+											marginLeft: -THUMB_SIZE / 2,
+										},
+									]}
+									{...maxThumbResponder.panHandlers}
+								>
+									<View style={styles.thumbInner} />
+								</View>
 							</View>
+
+							{/* Price labels */}
 							<View style={styles.sliderLabels}>
 								<Text style={styles.sliderLabel}>$0</Text>
 								<Text style={styles.sliderLabel}>$500</Text>
 								<Text style={styles.sliderLabel}>$1000</Text>
-								<Text style={styles.sliderLabel}>$2000+</Text>
+								<Text style={styles.sliderLabel}>$2000</Text>
 							</View>
 						</View>
 					</View>
@@ -335,31 +437,50 @@ const styles = StyleSheet.create({
 		borderColor: 'rgba(255, 255, 255, 0.08)',
 	},
 	sliderTrack: {
-		height: 6,
-		backgroundColor: 'rgba(255, 255, 255, 0.1)',
-		borderRadius: 3,
+		height: 30,
 		marginBottom: 16,
 		position: 'relative',
-		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	sliderBackground: {
+		position: 'absolute',
+		left: 0,
+		right: 0,
+		height: 4,
+		backgroundColor: 'rgba(255, 255, 255, 0.1)',
+		borderRadius: 2,
+		top: '50%',
+		marginTop: -2,
 	},
 	sliderFill: {
 		position: 'absolute',
-		left: '10%',
-		right: '30%',
-		height: 6,
+		height: 4,
 		backgroundColor: '#2b6cee',
-		borderRadius: 3,
+		borderRadius: 2,
+		top: '50%',
+		marginTop: -2,
 	},
 	sliderThumb: {
 		position: 'absolute',
-		left: '10%',
+		width: 20,
+		height: 20,
+		top: '50%',
+		marginTop: -10,
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	thumbInner: {
 		width: 20,
 		height: 20,
 		borderRadius: 10,
 		backgroundColor: '#050505',
 		borderWidth: 2,
 		borderColor: '#2b6cee',
-		top: -7,
+		shadowColor: '#2b6cee',
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.6,
+		shadowRadius: 8,
+		elevation: 8,
 	},
 	sliderLabels: {
 		flexDirection: 'row',
