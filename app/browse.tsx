@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import FilterModal from '../components/FilterModal';
 
 const { width } = Dimensions.get('window');
 const cardWidth = width / 2 - 16;
@@ -60,6 +61,18 @@ const products = [
 export default function BrowseScreen() {
 	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [searchText, setSearchText] = useState('');
+	const [showFilter, setShowFilter] = useState(false);
+	const [appliedFilters, setAppliedFilters] = useState<{
+		categories: string[];
+		sortBy: string;
+		brands: string[];
+		priceRange: [number, number];
+	}>({
+		categories: ['All'],
+		sortBy: 'popularity',
+		brands: [],
+		priceRange: [50, 1200],
+	});
 
 	const renderProductCard = ({ item }: { item: (typeof products)[0] }) => (
 		<TouchableOpacity
@@ -201,7 +214,7 @@ export default function BrowseScreen() {
 			</ScrollView>
 
 			{/* Filter FAB */}
-			<TouchableOpacity style={styles.filterFab}>
+			<TouchableOpacity style={styles.filterFab} onPress={() => setShowFilter(true)}>
 				<MaterialCommunityIcons
 					name="tune"
 					size={20}
@@ -209,6 +222,16 @@ export default function BrowseScreen() {
 				/>
 				<Text style={styles.filterFabText}>Filter</Text>
 			</TouchableOpacity>
+
+			{/* Filter Modal */}
+			<FilterModal
+				visible={showFilter}
+				onClose={() => setShowFilter(false)}
+				onApply={(filters) => {
+					setAppliedFilters(filters);
+					setShowFilter(false);
+				}}
+			/>
 		</SafeAreaView>
 	);
 }
