@@ -75,7 +75,6 @@ export default function HomeScreen() {
 
 	return (
 		<SafeAreaView style={styles.container} edges={['top']}>
-			<ScrollView showsVerticalScrollIndicator={false}>
 			{/* Header */}
 			<View style={styles.header}>
 				<View style={styles.headerTop}>
@@ -129,6 +128,7 @@ export default function HomeScreen() {
 						onPress={() => setSelectedCategory(cat)}
 					>
 						<Text
+							numberOfLines={1}
 							style={[
 								styles.categoryText,
 								selectedCategory === cat && styles.categoryTextActive,
@@ -139,6 +139,9 @@ export default function HomeScreen() {
 					</TouchableOpacity>
 				))}
 			</ScrollView>
+
+			{/* Main ScrollView Content */}
+			<ScrollView showsVerticalScrollIndicator={false} style={styles.mainScroll}>
 
 			{/* Hero Banner */}
 			<View style={styles.heroBanner}>
@@ -194,12 +197,27 @@ export default function HomeScreen() {
 				</ScrollView>
 			</View>
 
-			{/* Products Grid */}
-			<View style={styles.productsGrid}>
+			{/* Featured Products Section */}
+			<View style={styles.sectionHeader}>
+				<Text style={styles.sectionTitle}>Featured Products</Text>
+				<TouchableOpacity>
+					<Text style={styles.viewAllBtn}>View All</Text>
+				</TouchableOpacity>
+			</View>
+
+			{/* Products Carousel */}
+			<ScrollView
+				horizontal
+				showsHorizontalScrollIndicator={false}
+				decelerationRate="fast"
+				snapToAlignment="center"
+				scrollEventThrottle={16}
+				contentContainerStyle={styles.carouselContent}
+			>
 				{isLoading ? (
 					// Show skeleton loaders while loading
-					Array.from({ length: 6 }).map((_, index) => (
-						<View key={`skeleton-${index}`} style={styles.productCard}>
+					Array.from({ length: 3 }).map((_, index) => (
+						<View key={`skeleton-${index}`} style={styles.productCarouselCard}>
 							<View style={[styles.productImageContainer, styles.skeletonImage]} />
 							<View style={styles.skeletonContainer}>
 								<View style={[styles.skeletonBar, { width: '75%', height: 16 }]} />
@@ -215,7 +233,7 @@ export default function HomeScreen() {
 					products.map((product) => (
 						<TouchableOpacity
 							key={product.id}
-							style={styles.productCard}
+							style={styles.productCarouselCard}
 							activeOpacity={0.92}
 							onPress={() => {
 								router.push({
@@ -261,7 +279,7 @@ export default function HomeScreen() {
 						</TouchableOpacity>
 					))
 				)}
-			</View>
+			</ScrollView>
 
 			<View style={styles.spacer} />
 		</ScrollView>
@@ -278,8 +296,10 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		paddingTop: 24,
 		paddingBottom: 8,
+		backgroundColor: 'rgba(5,5,5,0.8)',
 		borderBottomWidth: 1,
 		borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+		zIndex: 11,
 	},
 	headerTop: {
 		flexDirection: 'row',
@@ -336,35 +356,41 @@ const styles = StyleSheet.create({
 		marginLeft: 8,
 	},
 	categoryScroll: {
-		marginTop: 16,
-		marginBottom: 12,
+		backgroundColor: 'rgba(5,5,5,0.8)',
+		borderBottomWidth: 1,
+		borderBottomColor: 'rgba(255, 255, 255, 0.05)',
+		zIndex: 9,
+		minHeight: 68,
 	},
 	categoryContent: {
-		paddingHorizontal: 20,
-		gap: 12,
+		paddingHorizontal: 16,
+		paddingVertical: 12,
+		gap: 10,
 	},
 	categoryBtn: {
-		paddingHorizontal: 20,
+		paddingHorizontal: 24,
 		paddingVertical: 10,
-		borderRadius: 20,
-		backgroundColor: 'rgba(255, 255, 255, 0.05)',
+		borderRadius: 24,
+		backgroundColor: 'rgba(255, 255, 255, 0.08)',
 		borderWidth: 1,
-		borderColor: 'rgba(255, 255, 255, 0.1)',
-		minHeight: 40,
+		borderColor: 'rgba(255, 255, 255, 0.15)',
+		height: 44,
 		justifyContent: 'center',
+		alignItems: 'center',
+		flexDirection: 'row',
 	},
 	categoryBtnActive: {
 		backgroundColor: '#2b6cee',
 		borderColor: '#2b6cee',
 		shadowColor: '#2b6cee',
 		shadowOffset: { width: 0, height: 4 },
-		shadowOpacity: 0.25,
-		shadowRadius: 8,
+		shadowOpacity: 0.3,
+		shadowRadius: 10,
 		elevation: 8,
 	},
 	categoryText: {
-		color: 'rgba(255, 255, 255, 0.6)',
-		fontSize: 13,
+		color: 'rgba(255, 255, 255, 0.7)',
+		fontSize: 14,
 		fontWeight: '600',
 	},
 	categoryTextActive: {
@@ -389,16 +415,20 @@ const styles = StyleSheet.create({
 		elevation: 8,
 	},
 	heroImageWrapper: {
-		flex: 1,
+		width: 160,
+		height: 160,
 		justifyContent: 'center',
 		alignItems: 'center',
-		marginLeft: -24,
+		marginLeft: 12,
+		marginVertical: 12,
+		borderRadius: 20,
+		backgroundColor: 'rgba(0, 0, 0, 0.2)',
 	},
 	heroImage: {
-		width: 180,
-		height: 160,
+		width: 140,
+		height: 140,
 		resizeMode: 'contain',
-		transform: [{ rotate: '-12deg' }, { scaleY: 1.1 }],
+		borderRadius: 16,
 	},
 	heroContent: {
 		flex: 1,
@@ -482,6 +512,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		paddingHorizontal: 20,
+		marginTop: 24,
 		marginBottom: 16,
 	},
 	sectionTitle: {
@@ -532,6 +563,20 @@ const styles = StyleSheet.create({
 		gap: 12,
 		marginBottom: 12,
 		justifyContent: 'space-between',
+	},
+	carouselContent: {
+		paddingHorizontal: 16,
+		paddingVertical: 12,
+		gap: 12,
+	},
+	productCarouselCard: {
+		width: 160,
+		backgroundColor: '#111318',
+		borderRadius: 24,
+		padding: 12,
+		borderWidth: 1,
+		borderColor: 'rgba(255, 255, 255, 0.08)',
+		overflow: 'hidden',
 	},
 	productCard: {
 		width: '48%',
@@ -648,6 +693,9 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-between',
 		alignItems: 'flex-end',
 		marginTop: 4,
+	},
+	mainScroll: {
+		flex: 1,
 	},
 	spacer: {
 		height: 140,
