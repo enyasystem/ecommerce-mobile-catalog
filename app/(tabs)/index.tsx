@@ -74,7 +74,8 @@ export default function HomeScreen() {
 	};
 
 	return (
-		<ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+		<SafeAreaView style={styles.container} edges={['top']}>
+			<ScrollView showsVerticalScrollIndicator={false}>
 			{/* Header */}
 			<View style={styles.header}>
 				<View style={styles.headerTop}>
@@ -264,6 +265,7 @@ export default function HomeScreen() {
 
 			<View style={styles.spacer} />
 		</ScrollView>
+		</SafeAreaView>
 	);
 }
 
