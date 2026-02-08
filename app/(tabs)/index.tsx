@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
 	View,
 	Text,
@@ -17,7 +17,8 @@ import { useGetProductsQuery } from '../../features/products/productsAPI';
 import { addToCart } from '../../features/cart/cartSlice';
 import { toggleFavorite, selectIsFavorited, selectFavoritedIds } from '../../features/favorites/favoritesSlice';
 import { getOptimizedImageSource } from '../../utils/imageOptimization';
-import { createBounceAnimation } from '../../utils/animations';
+import { createBounceAnimation, createFadeAnimation } from '../../utils/animations';
+import { createPulseAnimation, createSlideFromSideAnimation, createFloatingAnimation, createShimmerAnimation, createMarqueeAnimation } from '../../utils/advancedAnimations';
 
 const CATEGORIES = ['All', 'electronics', "men's clothing", "women's clothing", 'jewelery'];
 const BRANDS = [
@@ -38,6 +39,24 @@ export default function HomeScreen() {
 
 	// Logo bounce animation
 	const logoAnimation = createBounceAnimation();
+
+	// Product carousel fade animations
+	const [carouselAnimations, setCarouselAnimations] = useState<any[]>([]);
+
+	// Category pills slide-in animations - CONTINUOUS
+	const [categoryAnimations, setCategoryAnimations] = useState<any[]>([]);
+
+	// Flash sale pulse animation
+	const saleAnimation = createPulseAnimation(1, 1.08, 1000);
+
+	// Favorite button bounce animations (one per product for carousel)
+	const [favoriteBounceAnimations, setFavoriteBounceAnimations] = useState<{ [key: string]: any }>({});
+
+	// Continuous attention-grabbing animations - stored in refs to persist across renders
+	const heroFloatRef = useRef<any>(null);
+	const featuredMarqueeRef = useRef<any>(null);
+	const womensMarqueeRef = useRef<any>(null);
+	const newArrivalsMarqueeRef = useRef<any>(null);
 
 	// Fetch products from FakeStore API
 	const { data: apiProducts = [], isLoading } = useGetProductsQuery();
@@ -80,6 +99,106 @@ export default function HomeScreen() {
 	useEffect(() => {
 		logoAnimation.bounce();
 	}, []);
+
+	// Initialize and trigger carousel fade-in animations
+	useEffect(() => {
+		if (!isLoading && allProducts.length > 0) {
+			const animations = allProducts.slice(0, 8).map(() => createFadeAnimation(400));
+			setCarouselAnimations(animations);
+			
+			// Stagger the fade animations
+			animations.forEach((anim, index) => {
+				setTimeout(() => {
+					anim.fadeIn();
+				}, index * 80); // 80ms stagger between each product
+			});
+		}
+	}, [isLoading, allProducts]);
+
+	// Initialize and trigger category pills slide-in animations - CONTINUOUS LOOP
+	useEffect(() => {
+		const animations = CATEGORIES.map(() => createSlideFromSideAnimation());
+		setCategoryAnimations(animations);
+		
+		// Stagger the initial slide animations, then loop continuously
+		const playAnimationSequence = () => {
+			animations.forEach((anim, index) => {
+				setTimeout(() => {
+					anim.slideIn();
+				}, index * 100); // 100ms stagger between each
+			});
+		};
+
+		playAnimationSequence();
+		
+		// Loop every 3 seconds for continuous attention-grabbing effect
+		const interval = setInterval(playAnimationSequence, 3000);
+		
+		return () => clearInterval(interval);
+	}, []);
+
+	// Start flash sale pulse animation on mount
+	useEffect(() => {
+		saleAnimation.pulse();
+		return () => {
+			saleAnimation.stop();
+		};
+	}, []);
+
+	// Initialize and start continuous floating animation on hero image
+	useEffect(() => {
+		if (!heroFloatRef.current) {
+			heroFloatRef.current = createFloatingAnimation(12, 4000);
+		}
+		heroFloatRef.current.startFloating();
+		return () => {
+			if (heroFloatRef.current) {
+				heroFloatRef.current.stop();
+			}
+		};
+	}, []);
+
+	// Initialize and start marquee animations on featured sections
+	useEffect(() => {
+		if (!featuredMarqueeRef.current) {
+			featuredMarqueeRef.current = createMarqueeAnimation(3000);
+		}
+		if (!womensMarqueeRef.current) {
+			womensMarqueeRef.current = createMarqueeAnimation(3000);
+		}
+		if (!newArrivalsMarqueeRef.current) {
+			newArrivalsMarqueeRef.current = createMarqueeAnimation(3000);
+		}
+		
+		featuredMarqueeRef.current.startMarquee();
+		womensMarqueeRef.current.startMarquee();
+		newArrivalsMarqueeRef.current.startMarquee();
+		
+		return () => {
+			if (featuredMarqueeRef.current) {
+				featuredMarqueeRef.current.stop();
+			}
+			if (womensMarqueeRef.current) {
+				womensMarqueeRef.current.stop();
+			}
+			if (newArrivalsMarqueeRef.current) {
+				newArrivalsMarqueeRef.current.stop();
+			}
+		};
+	}, []);
+
+	// Helper function to get or create favorite bounce animation for a product
+	const getFavoriteBounceAnimation = (productId: string) => {
+		if (!favoriteBounceAnimations[productId]) {
+			const newAnim = createBounceAnimation();
+			setFavoriteBounceAnimations(prev => ({
+				...prev,
+				[productId]: newAnim
+			}));
+			return newAnim;
+		}
+		return favoriteBounceAnimations[productId];
+	};
 
 	useEffect(() => {
 		const tick = () => {
@@ -150,38 +269,47 @@ export default function HomeScreen() {
 				contentContainerStyle={styles.categoryContent}
 				scrollEnabled={false}
 			>
-				{CATEGORIES.map((cat) => (
-					<TouchableOpacity
+				{CATEGORIES.map((cat, index) => (
+					<Animated.View 
 						key={cat}
-						style={[
-							styles.categoryBtn,
-							selectedCategory === cat && styles.categoryBtnActive,
-						]}
-						onPress={() => setSelectedCategory(cat)}
+						style={categoryAnimations[index]?.animatedStyle || {}}
 					>
-						<Text
-							numberOfLines={1}
+						<TouchableOpacity
 							style={[
-								styles.categoryText,
-								selectedCategory === cat && styles.categoryTextActive,
+								styles.categoryBtn,
+								selectedCategory === cat && styles.categoryBtnActive,
 							]}
+							onPress={() => setSelectedCategory(cat)}
 						>
-							{cat}
-						</Text>
-					</TouchableOpacity>
+							<Text
+								numberOfLines={1}
+								style={[
+									styles.categoryText,
+									selectedCategory === cat && styles.categoryTextActive,
+								]}
+							>
+								{cat}
+							</Text>
+						</TouchableOpacity>
+					</Animated.View>
 				))}
 			</ScrollView>
 
 			{/* Hero Banner */}
 			<View style={styles.heroBanner}>
-				<View style={styles.heroImageWrapper}>
+				<Animated.View 
+					style={[
+						styles.heroImageWrapper, 
+						heroFloatRef.current?.animatedStyle || {}
+					]}
+				>
 					<Image
 						source={{
 							uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAAyo8s8cOPxPs6GHiMbibuJRx5UhsJiRrngtKHQeQFaftfKR99R2KsMHcHJr9z9eT-QS6bTxegIVBdf-hDM6LmyYUcq2AzNyZoB9EaBHYSQploxk3kzl4ohwdWzALuORD4IRTLAreA3XsO6QfI-hiYiKJaD6xqByB8_QKUm0wCxmo_RlEMzmFq25Nxj6wOKaJyNJT-bjC1n5dcjYX4d2p3Vgk8dELElkXTlsuDHeEA9qcffvOkIHEfE3BpQaTOt3HoNDCIsmYGm0pG',
 						}}
 						style={styles.heroImage}
 					/>
-				</View>
+				</Animated.View>
 				<View style={styles.heroContent}>
 					<Text style={styles.heroLabel}>Limited Edition</Text>
 					<Text style={styles.heroTitle}>
@@ -194,12 +322,23 @@ export default function HomeScreen() {
 			</View>
 
 			{/* New Arrivals Carousel */}
-			<View style={styles.sectionHeader}>
+			<Animated.View 
+				style={[
+					styles.sectionHeader,
+					newArrivalsMarqueeRef.current?.animatedStyle || {},
+					{
+						paddingVertical: 20,
+						paddingHorizontal: 16,
+						marginHorizontal: -16,
+						marginVertical: 8,
+					}
+				]}
+			>
 				<Text style={styles.sectionTitle}>New Arrivals</Text>
 				<TouchableOpacity>
 					<Text style={styles.viewAllBtn}>View All</Text>
 				</TouchableOpacity>
-			</View>
+			</Animated.View>
 
 			<ScrollView
 				horizontal
@@ -224,96 +363,113 @@ export default function HomeScreen() {
 						</View>
 					))
 				) : (
-					allProducts.slice(0, 8).map((product) => (
-						<TouchableOpacity
-							key={product.id}
-							style={styles.productCarouselCard}
-							activeOpacity={0.92}
-							onPress={() => {
-								router.push({
-									pathname: '/product/[id]',
-									params: {
-										id: product.id,
-										name: product.name,
-										price: product.price,
-										image: product.image,
-										originalPrice: product.originalPrice || '',
-									},
-								});
-							}}
-						>
-							<View style={styles.productImageContainer}>
-								{product.isNew && (
-									<View style={styles.newBadge}>
-										<Text style={styles.newBadgeText}>NEW</Text>
-									</View>
-								)}
+					allProducts.slice(0, 8).map((product, carIndex) => {
+						const favAnim = getFavoriteBounceAnimation(product.id);
+						return (
+							<Animated.View
+								key={product.id}
+								style={[
+									styles.productCarouselCard,
+									carouselAnimations[carIndex]?.animatedStyle || {}
+								]}
+							>
 								<TouchableOpacity
-									style={styles.favoriteBtn}
-									onPress={() =>
-										dispatch(
-											toggleFavorite({
+									style={styles.productImageContainer}
+									activeOpacity={0.92}
+									onPress={() => {
+										router.push({
+											pathname: '/product/[id]',
+											params: {
 												id: product.id,
 												name: product.name,
 												price: product.price,
 												image: product.image,
-												category: product.category,
-											})
-										)
-									}
-									activeOpacity={0.6}
+												originalPrice: product.originalPrice || '',
+											},
+										});
+									}}
 								>
-									<MaterialCommunityIcons
-										name={favoriteIds.includes(product.id) ? 'heart' : 'heart-outline'}
-										size={18}
-										color="#2b6cee"
+									{product.isNew && (
+										<View style={styles.newBadge}>
+											<Text style={styles.newBadgeText}>NEW</Text>
+										</View>
+									)}
+									<Animated.View
+										style={[styles.favoriteBtn, favAnim.animatedStyle]}
+									>
+										<TouchableOpacity
+											onPress={() => {
+												favAnim.bounce();
+												dispatch(
+													toggleFavorite({
+														id: product.id,
+														name: product.name,
+														price: product.price,
+														image: product.image,
+														category: product.category,
+													})
+												);
+											}}
+											activeOpacity={0.6}
+										>
+											<MaterialCommunityIcons
+												name={favoriteIds.includes(product.id) ? 'heart' : 'heart-outline'}
+												size={18}
+												color="#2b6cee"
+											/>
+										</TouchableOpacity>
+									</Animated.View>
+									<Image
+										source={{ uri: product.image }}
+										style={styles.productImage}
 									/>
 								</TouchableOpacity>
-								<Image
-									source={{ uri: product.image }}
-									style={styles.productImage}
-								/>
-							</View>
-							<Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
-							<View style={styles.productFooter}>
-								<View style={styles.priceWrap}>
-									{product.originalPrice && (
-										<Text style={styles.originalPrice}>
-											${product.originalPrice}
-										</Text>
-									)}
-									<Text style={styles.productPrice}>${product.price}</Text>
+								<Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
+								<View style={styles.productFooter}>
+									<View style={styles.priceWrap}>
+										{product.originalPrice && (
+											<Text style={styles.originalPrice}>
+												${product.originalPrice}
+											</Text>
+										)}
+										<Text style={styles.productPrice}>${product.price}</Text>
+									</View>
+									<TouchableOpacity
+										style={styles.addBtn}
+										onPress={() =>
+											dispatch(
+												addToCart({
+													id: product.id,
+													name: product.name,
+													price: product.price,
+													image: product.image,
+												})
+											)
+										}
+										activeOpacity={0.7}
+									>
+										<MaterialCommunityIcons name="plus" size={18} color="#fff" />
+									</TouchableOpacity>
 								</View>
-								<TouchableOpacity
-									style={styles.addBtn}
-									onPress={() =>
-										dispatch(
-											addToCart({
-												id: product.id,
-												name: product.name,
-												price: product.price,
-												image: product.image,
-											})
-										)
-									}
-									activeOpacity={0.7}
-								>
-									<MaterialCommunityIcons name="plus" size={18} color="#fff" />
-								</TouchableOpacity>
-							</View>
-						</TouchableOpacity>
-					))
+							</Animated.View>
+						);
+					})
 				)}
 			</ScrollView>
 
 			{/* Flash Sale */}
-			<View style={styles.flashSale}>
+			<Animated.View 
+				style={[
+					styles.flashSale,
+					saleAnimation.animatedStyle
+				]}
+			>
 				<View style={styles.flashSaleContent}>
 					<MaterialCommunityIcons name="lightning-bolt" size={16} color="#f59e0b" />
 					<Text style={styles.flashText}>FLASH SALE</Text>
 				</View>
 				<Text style={styles.flashTime}>{formatHHMMSS(remaining)}</Text>
-			</View>
+			</Animated.View>
 
 			{/* Brands Section */}
 			<View style={styles.brandsSection}>
@@ -340,12 +496,23 @@ export default function HomeScreen() {
 			</View>
 
 			{/* Featured Products Section */}
-			<View style={styles.sectionHeader}>
+			<Animated.View 
+				style={[
+					styles.sectionHeader,
+					featuredMarqueeRef.current?.animatedStyle || {},
+					{
+						paddingVertical: 20,
+						paddingHorizontal: 16,
+						marginHorizontal: -16,
+						marginVertical: 8,
+					}
+				]}
+			>
 				<Text style={styles.sectionTitle}>Featured Products</Text>
 				<TouchableOpacity>
 					<Text style={styles.viewAllBtn}>View All</Text>
 				</TouchableOpacity>
-			</View>
+			</Animated.View>
 
 			{/* Products Carousel */}
 			<ScrollView
@@ -666,12 +833,23 @@ export default function HomeScreen() {
 			</ScrollView>
 
 			{/* Women's Clothing Section */}
-			<View style={styles.sectionHeader}>
+			<Animated.View 
+				style={[
+					styles.sectionHeader,
+					womensMarqueeRef.current?.animatedStyle || {},
+					{
+						paddingVertical: 20,
+						paddingHorizontal: 16,
+						marginHorizontal: -16,
+						marginVertical: 8,
+					}
+				]}
+			>
 				<Text style={styles.sectionTitle}>Women's Clothing</Text>
 				<TouchableOpacity>
 					<Text style={styles.viewAllBtn}>View All</Text>
 				</TouchableOpacity>
-			</View>
+			</Animated.View>
 			<ScrollView
 				horizontal
 				showsHorizontalScrollIndicator={false}
@@ -1129,8 +1307,8 @@ const styles = StyleSheet.create({
 		marginBottom: 16,
 	},
 	sectionTitle: {
-		color: 'rgba(255, 255, 255, 0.4)',
-		fontSize: 12,
+		color: '#FFFFFF',
+		fontSize: 18,
 		fontWeight: '700',
 		letterSpacing: 0.5,
 		textTransform: 'uppercase',

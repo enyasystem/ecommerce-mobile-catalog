@@ -47,7 +47,12 @@ export const createPulseAnimation = (
  * Shimmer animation - for skeleton loaders
  * Creates a shimmering effect moving horizontally across an element
  */
-export const createShimmerAnimation = (duration: number = 1500) => {
+export const createShimmerAnimation = (
+  duration: number = 1500,
+  startColor: string = '#1a1a2e',
+  midColor: string = '#2d2d4e',
+  endColor: string = '#1a1a2e'
+) => {
   const shimmerValue = new Animated.Value(0);
 
   const startShimmering = () => {
@@ -67,7 +72,7 @@ export const createShimmerAnimation = (duration: number = 1500) => {
 
   const backgroundColor = shimmerValue.interpolate({
     inputRange: [0, 0.5, 1],
-    outputRange: ['#1a1a2e', '#2d2d4e', '#1a1a2e'],
+    outputRange: [startColor, midColor, endColor],
   });
 
   return {
@@ -400,6 +405,49 @@ export const createShakeAnimation = (
     shake,
     animatedStyle: {
       transform: [{ translateX: shakeValue }],
+    },
+  };
+};
+
+/**
+ * Marquee animation - scrolling text effect
+ * Creates a continuous horizontal scrolling animation like a news ticker
+ */
+export const createMarqueeAnimation = (duration: number = 3000) => {
+  const marqueeValue = new Animated.Value(0);
+
+  const startMarquee = () => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(marqueeValue, {
+          toValue: 1,
+          duration,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+        Animated.timing(marqueeValue, {
+          toValue: 0,
+          duration: 0,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  };
+
+  const stop = () => {
+    marqueeValue.resetAnimation();
+  };
+
+  const translateX = marqueeValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [100, -100],
+  });
+
+  return {
+    startMarquee,
+    stop,
+    animatedStyle: {
+      transform: [{ translateX }],
     },
   };
 };
