@@ -1,0 +1,26 @@
+{
+  "build": {
+    "production": {
+      "android": {
+        "buildType": "apk",
+        "env": {
+          "EXPO_NO_DEV_CLIENT": "1"
+        }
+      },
+      "ios": {
+        "buildType": "archive",
+        "env": {
+          "EXPO_NO_DEV_CLIENT": "1"
+        }
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "serviceAccount": "~/.android/service-account.json",
+        "track": "internal"
+      }
+    }
+  }
+}

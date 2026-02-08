@@ -15,6 +15,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useGetProductsQuery } from '../../features/products/productsAPI';
 import { addToCart } from '../../features/cart/cartSlice';
 import { toggleFavorite, selectIsFavorited, selectFavoritedIds } from '../../features/favorites/favoritesSlice';
+import { getOptimizedImageSource } from '../../utils/imageOptimization';
 
 const CATEGORIES = ['All', 'electronics', "men's clothing", "women's clothing", 'jewelery'];
 const BRANDS = [
