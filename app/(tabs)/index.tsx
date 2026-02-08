@@ -76,7 +76,7 @@ export default function HomeScreen() {
 			<View style={styles.header}>
 				<View style={styles.headerTop}>
 					<View style={styles.logo}>
-						<MaterialCommunityIcons name="hexagon-outline" size={28} color="#2b6cee" />
+					<MaterialCommunityIcons name="cube" size={28} color="#2b6cee" />
 						<Text style={styles.logoText}>NexusStore</Text>
 					</View>
 					<TouchableOpacity style={styles.notificationBtn}>
