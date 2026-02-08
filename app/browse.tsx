@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
 	View,
 	Text,
@@ -14,6 +14,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import FilterModal from '../components/FilterModal';
+import ProductSkeleton from '../components/products/ProductSkeleton';
 import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
@@ -65,6 +66,7 @@ export default function BrowseScreen() {
 	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [searchText, setSearchText] = useState('');
 	const [showFilter, setShowFilter] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
 	const [isRefreshing, setIsRefreshing] = useState(false);
 	const [error, setError] = useState<{ type: string; message: string } | null>(null);
 	const [appliedFilters, setAppliedFilters] = useState<{
@@ -79,9 +81,18 @@ export default function BrowseScreen() {
 		priceRange: [50, 1200],
 	});
 
+	// Simulate initial load on mount
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setIsLoading(false);
+		}, 1200);
+		return () => clearTimeout(timer);
+	}, []);
+
 	// Handle pull-to-refresh
 	const onRefresh = async () => {
 		setIsRefreshing(true);
+		setIsLoading(true);
 		setError(null);
 		try {
 			// Simulate API call with a 1 second delay
@@ -99,6 +110,7 @@ export default function BrowseScreen() {
 			console.error('Error refreshing products:', err);
 		} finally {
 			setIsRefreshing(false);
+			setIsLoading(false);
 		}
 	};
 
@@ -348,16 +360,25 @@ export default function BrowseScreen() {
 					</View>
 				)}
 
-				{/* Products Grid */}
+				{/* Products Grid / Loading State */}
 				{!error && (
 					<View style={styles.productsGrid}>
-						{filteredProducts.length > 0 ? (
+						{isLoading ? (
+							// Show skeleton loaders while loading
+							Array.from({ length: 4 }).map((_, index) => (
+								<View key={`skeleton-${index}`} style={styles.gridColumn}>
+									<ProductSkeleton />
+								</View>
+							))
+						) : filteredProducts.length > 0 ? (
+							// Show actual products
 							filteredProducts.map((item) => (
 								<View key={item.id} style={styles.gridColumn}>
 									{renderProductCard({ item })}
 								</View>
 							))
 						) : (
+							// Show empty state
 							<View style={styles.emptyStateContainer}>
 								<MaterialCommunityIcons
 									name="magnify"

@@ -362,98 +362,98 @@ export default function SearchScreen() {
 					</View>
 				)}
 
-				{!error && (
-					// Search Results
-					<View style={styles.resultsSection}>
-						<Text style={styles.resultsTitle}>
-							Results for "{searchQuery}" ({filteredProducts.length})
-						</Text>
-						{filteredProducts.length > 0 ? (
-							<View style={styles.productsList}>
-								{filteredProducts.map((item) => (
-									<View key={item.id}>
-										{renderProductCard(item)}
-									</View>
-								))}
-							</View>
-						) : (
-							<View style={styles.emptyState}>
-								<MaterialCommunityIcons
-									name="magnify"
-									size={48}
-									color="rgba(255,255,255,0.2)"
-								/>
-								<Text style={styles.emptyStateText}>No results found</Text>
-								<Text style={styles.emptyStateSubtext}>
-									Try different keywords or categories
-								</Text>
-							</View>
-						)}
-					</View>
-				) : (
-					<>
-						{/* Recent Searches */}
-						{recentSearches.length > 0 && (
-							<View style={styles.section}>
-								<View style={styles.sectionHeader}>
-									<Text style={styles.sectionTitle}>RECENT</Text>
-									<TouchableOpacity onPress={clearRecentSearches}>
-										<Text style={styles.sectionAction}>Clear All</Text>
-									</TouchableOpacity>
+				{!error && 
+					(showResults ? (
+						// Search Results
+						<View style={styles.resultsSection}>
+							<Text style={styles.resultsTitle}>
+								Results for "{searchQuery}" ({filteredProducts.length})
+							</Text>
+							{filteredProducts.length > 0 ? (
+								<View style={styles.productsList}>
+									{filteredProducts.map((item) => (
+										<View key={item.id}>
+											{renderProductCard(item)}
+										</View>
+									))}
 								</View>
-								<View style={styles.recentList}>
-									{recentSearches.map((search, index) => (
-										<TouchableOpacity
-											key={index}
-											style={styles.recentItem}
-											onPress={() => handleRecentSearchTap(search)}
-										>
-											<View style={styles.recentIconContainer}>
+							) : (
+								<View style={styles.emptyState}>
+									<MaterialCommunityIcons
+										name="magnify"
+										size={48}
+										color="rgba(255,255,255,0.2)"
+									/>
+									<Text style={styles.emptyStateText}>No results found</Text>
+									<Text style={styles.emptyStateSubtext}>
+										Try different keywords or categories
+									</Text>
+								</View>
+							)}
+						</View>
+					) : (
+						<>
+							{/* Recent Searches */}
+							{recentSearches.length > 0 && (
+								<View style={styles.section}>
+									<View style={styles.sectionHeader}>
+										<Text style={styles.sectionTitle}>RECENT</Text>
+										<TouchableOpacity onPress={clearRecentSearches}>
+											<Text style={styles.sectionAction}>Clear All</Text>
+										</TouchableOpacity>
+									</View>
+									<View style={styles.recentList}>
+										{recentSearches.map((search, index) => (
+											<TouchableOpacity
+												key={index}
+												style={styles.recentItem}
+												onPress={() => handleRecentSearchTap(search)}
+											>
+												<View style={styles.recentIconContainer}>
+													<MaterialCommunityIcons
+														name="history"
+														size={18}
+														color="rgba(255,255,255,0.6)"
+													/>
+												</View>
+												<Text style={styles.recentText}>{search}</Text>
 												<MaterialCommunityIcons
-													name="history"
+													name="arrow-top-left"
 													size={18}
-													color="rgba(255,255,255,0.6)"
+													color="rgba(255,255,255,0.4)"
+												/>
+											</TouchableOpacity>
+										))}
+									</View>
+								</View>
+							)}
+
+							{/* Trending Now */}
+							<View style={styles.section}>
+								<Text style={styles.sectionTitle}>TRENDING NOW</Text>
+								<View style={styles.trendingGrid}>
+									{trendingTopics.map((topic) => (
+										<TouchableOpacity key={topic.id} style={styles.trendingCard}>
+											<View
+												style={[
+													styles.trendingIcon,
+													{ backgroundColor: topic.color + '20' },
+												]}
+											>
+												<MaterialCommunityIcons
+													name={topic.icon as any}
+													size={18}
+													color={topic.color}
 												/>
 											</View>
-											<Text style={styles.recentText}>{search}</Text>
-											<MaterialCommunityIcons
-												name="arrow-top-left"
-												size={18}
-												color="rgba(255,255,255,0.4)"
-											/>
+											<Text style={styles.trendingText}>{topic.name}</Text>
 										</TouchableOpacity>
 									))}
 								</View>
 							</View>
-						)}
-
-						{/* Trending Now */}
-						<View style={styles.section}>
-							<Text style={styles.sectionTitle}>TRENDING NOW</Text>
-							<View style={styles.trendingGrid}>
-								{trendingTopics.map((topic) => (
-									<TouchableOpacity key={topic.id} style={styles.trendingCard}>
-										<View
-											style={[
-												styles.trendingIcon,
-												{ backgroundColor: topic.color + '20' },
-											]}
-										>
-											<MaterialCommunityIcons
-												name={topic.icon as any}
-												size={18}
-												color={topic.color}
-											/>
-										</View>
-										<Text style={styles.trendingText}>{topic.name}</Text>
-									</TouchableOpacity>
-								))}
-							</View>
-						</View>
-					</>
-				)}
-				</>
-				)}
+						</>
+					))
+				}
 			</ScrollView>
 		</SafeAreaView>
 	);
