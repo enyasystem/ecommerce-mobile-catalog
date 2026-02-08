@@ -7,7 +7,6 @@ import {
 	TextInput,
 	TouchableOpacity,
 	Image,
-	FlatList,
 	Dimensions,
 	SafeAreaView,
 } from 'react-native';
@@ -114,7 +113,7 @@ export default function BrowseScreen() {
 
 	return (
 		<SafeAreaView style={styles.container}>
-			{/* Header */}
+			{/* Sticky Header */}
 			<View style={styles.header}>
 				<View style={styles.headerContent}>
 					<View style={styles.logoContainer}>
@@ -159,44 +158,47 @@ export default function BrowseScreen() {
 				</BlurView>
 			</View>
 
-			{/* Categories Scroll */}
-			<ScrollView
-				horizontal
-				showsHorizontalScrollIndicator={false}
-				style={styles.categoriesScroll}
-				contentContainerStyle={styles.categoriesContent}
-			>
-				{categories.map((category) => (
-					<TouchableOpacity
-						key={category}
-						style={[
-							styles.categoryBtn,
-							selectedCategory === category && styles.categoryBtnActive,
-						]}
-						onPress={() => setSelectedCategory(category)}
-					>
-						<Text
+			<ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+				{/* Categories Scroll */}
+				<ScrollView
+					horizontal
+					showsHorizontalScrollIndicator={false}
+					style={styles.categoriesScroll}
+					contentContainerStyle={styles.categoriesContent}
+					nestedScrollEnabled={true}
+				>
+					{categories.map((category) => (
+						<TouchableOpacity
+							key={category}
 							style={[
-								styles.categoryText,
-								selectedCategory === category && styles.categoryTextActive,
+								styles.categoryBtn,
+								selectedCategory === category && styles.categoryBtnActive,
 							]}
+							onPress={() => setSelectedCategory(category)}
 						>
-							{category}
-						</Text>
-					</TouchableOpacity>
-				))}
-			</ScrollView>
+							<Text
+								style={[
+									styles.categoryText,
+									selectedCategory === category && styles.categoryTextActive,
+								]}
+							>
+								{category}
+							</Text>
+						</TouchableOpacity>
+					))}
+				</ScrollView>
 
-			{/* Products Grid */}
-			<FlatList
-				data={products}
-				renderItem={renderProductCard}
-				keyExtractor={(item) => item.id}
-				numColumns={2}
-				columnWrapperStyle={styles.gridRow}
-				scrollEnabled={true}
-				contentContainerStyle={styles.productsGrid}
-			/>
+				{/* Products Grid */}
+				<View style={styles.productsGrid}>
+					{products.map((item) => (
+						<View key={item.id} style={styles.gridColumn}>
+							{renderProductCard({ item })}
+						</View>
+					))}
+				</View>
+
+				<View style={styles.spacer} />
+			</ScrollView>
 
 			{/* Filter FAB */}
 			<TouchableOpacity style={styles.filterFab}>
@@ -223,6 +225,10 @@ const styles = StyleSheet.create({
 		backgroundColor: 'rgba(5,5,5,0.8)',
 		borderBottomWidth: 1,
 		borderBottomColor: 'rgba(255,255,255,0.05)',
+		zIndex: 10,
+	},
+	scrollContent: {
+		flex: 1,
 	},
 	headerContent: {
 		flexDirection: 'row',
@@ -315,8 +321,16 @@ const styles = StyleSheet.create({
 		fontWeight: '700',
 	},
 	productsGrid: {
+		flexDirection: 'row',
+		flexWrap: 'wrap',
 		paddingHorizontal: 16,
-		paddingBottom: 180,
+		paddingTop: 12,
+		paddingBottom: 20,
+	},
+	gridColumn: {
+		width: '50%',
+		paddingHorizontal: 8,
+		marginBottom: 16,
 	},
 	gridRow: {
 		justifyContent: 'space-between',
@@ -439,5 +453,8 @@ const styles = StyleSheet.create({
 		color: '#fff',
 		fontWeight: '700',
 		fontSize: 14,
+	},
+	spacer: {
+		height: 120,
 	},
 });
