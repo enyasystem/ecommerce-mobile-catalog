@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useGetProductsQuery } from '../../features/products/productsAPI';
 import { addToCart } from '../../features/cart/cartSlice';
-import { toggleFavorite, selectIsFavorited } from '../../features/favorites/favoritesSlice';
+import { toggleFavorite, selectIsFavorited, selectFavoritedIds } from '../../features/favorites/favoritesSlice';
 
 const CATEGORIES = ['All', 'electronics', "men's clothing", "women's clothing", 'jewelery'];
 const BRANDS = [
@@ -31,9 +31,7 @@ export default function HomeScreen() {
 	const [searchText, setSearchText] = useState('');
 	const router = useRouter();
 	const dispatch = useDispatch();
-	const favoriteIds = useSelector((state: any) =>
-		state.favorites.items.map((item: any) => item.id)
-	);
+	const favoriteIds = useSelector(selectFavoritedIds);
 
 	// Fetch products from FakeStore API
 	const { data: apiProducts = [], isLoading } = useGetProductsQuery();

@@ -19,7 +19,7 @@ import ProductSkeleton from '../components/products/ProductSkeleton';
 import { useRouter } from 'expo-router';
 import { useGetProductsQuery } from '../features/products/productsAPI';
 import { addToCart } from '../features/cart/cartSlice';
-import { toggleFavorite } from '../features/favorites/favoritesSlice';
+import { toggleFavorite, selectFavoritedIds } from '../features/favorites/favoritesSlice';
 
 const { width } = Dimensions.get('window');
 const cardWidth = width / 2 - 16;
@@ -29,9 +29,7 @@ const categories = ['All', 'electronics', "men's clothing", "women's clothing", 
 export default function BrowseScreen() {
 	const router = useRouter();
 	const dispatch = useDispatch();
-	const favoriteIds = useSelector((state: any) =>
-		state.favorites.items.map((item: any) => item.id)
-	);
+	const favoriteIds = useSelector(selectFavoritedIds);
 	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [searchText, setSearchText] = useState('');
 	const [showFilter, setShowFilter] = useState(false);

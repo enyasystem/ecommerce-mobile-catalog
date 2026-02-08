@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 
 export interface CartItem {
 	id: string;
@@ -55,3 +55,25 @@ const cartSlice = createSlice({
 
 export const { addToCart, increaseQuantity, decreaseQuantity, removeFromCart, clearCart } = cartSlice.actions;
 export default cartSlice.reducer;
+
+// Memoized selectors to prevent unnecessary rerenders
+const selectCartState = (state: any) => state.cart;
+const selectCartItems = (state: any) => state.cart.items;
+
+export const selectCartCount = createSelector(
+  [selectCartItems],
+  (items: CartItem[]) => items.reduce((total, item) => total + item.quantity, 0)
+);
+
+export const selectCartTotal = createSelector(
+  [selectCartItems],
+  (items: CartItem[]) => {
+    const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
+    const tax = subtotal * 0.08;
+    return {
+      subtotal: Math.round(subtotal * 100) / 100,
+      tax: Math.round(tax * 100) / 100,
+      total: Math.round((subtotal + tax) * 100) / 100,
+    };
+  }
+);

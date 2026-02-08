@@ -18,7 +18,7 @@ import { useRouter } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { useGetProductsQuery } from '../../features/products/productsAPI';
 import { addToCart } from '../../features/cart/cartSlice';
-import { toggleFavorite } from '../../features/favorites/favoritesSlice';
+import { toggleFavorite, selectFavoritedIds } from '../../features/favorites/favoritesSlice';
 import ProductSkeleton from '../../components/products/ProductSkeleton';
 
 const { width } = Dimensions.get('window');
@@ -34,9 +34,7 @@ const trendingTopics = [
 export default function SearchScreen() {
 	const router = useRouter();
 	const dispatch = useDispatch();
-	const favoriteIds = useSelector((state: any) =>
-		state.favorites.items.map((item: any) => item.id)
-	);
+	const favoriteIds = useSelector(selectFavoritedIds);
 	const [searchQuery, setSearchQuery] = useState('');
 	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [recentSearches, setRecentSearches] = useState<string[]>([]);

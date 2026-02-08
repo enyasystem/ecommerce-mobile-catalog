@@ -21,8 +21,10 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.nexusstore.ecommerce"
     },
+    "scheme": "nexusstore",
     "web": {
       "favicon": "./assets/favicon.png"
     },

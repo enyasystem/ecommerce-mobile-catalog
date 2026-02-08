@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 
 interface FavItem {
 	id: string;
@@ -47,11 +47,20 @@ export const { toggleFavorite, removeFavorite, clearFavorites } =
 
 export default favoritesSlice.reducer;
 
+// Memoized selectors to prevent unnecessary rerenders
+const selectFavoritesItems = (state: any) => state.favorites.items;
+
 // Selector to check if a product is favorited
 export const selectIsFavorited = (state: any, productId: string) => {
 	return state.favorites.items.some((item: FavItem) => item.id === productId);
 };
 
-export const selectFavoritedCount = (state: any) => {
-	return state.favorites.items.length;
-};
+export const selectFavoritedCount = createSelector(
+  [selectFavoritesItems],
+  (items: FavItem[]) => items.length
+);
+
+export const selectFavoritedIds = createSelector(
+  [selectFavoritesItems],
+  (items: FavItem[]) => items.map((item) => item.id)
+);

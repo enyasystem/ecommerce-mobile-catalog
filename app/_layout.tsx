@@ -7,14 +7,11 @@ import { BlurView } from 'expo-blur';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Provider, useSelector } from 'react-redux';
 import { store } from '../store/index';
+import { selectCartCount } from '../features/cart/cartSlice';
 
 function CustomTabBarContent({ state, descriptors, navigation }: any) {
   const insets = useSafeAreaInsets();
-  const cartItems = useSelector((state: any) => state.cart.items);
-  const cartCount = cartItems.reduce(
-    (total: number, item: any) => total + item.quantity,
-    0
-  );
+  const cartCount = useSelector(selectCartCount);
 
   return (
     <View style={[styles.tabBarContainer, { paddingBottom: insets.bottom + 8 }]}>
