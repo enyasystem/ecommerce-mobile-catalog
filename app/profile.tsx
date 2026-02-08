@@ -5,6 +5,7 @@ export default function ProfileScreen() {
 	return (
 		<View style={styles.container}>
 			<Text style={styles.text}>User Profile</Text>
+			<Text style={styles.text}>Comming Soon</Text>
 		</View>
 	);
 }

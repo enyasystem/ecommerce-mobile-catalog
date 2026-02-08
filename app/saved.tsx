@@ -112,7 +112,7 @@ export default function SavedScreen() {
 	);
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<SafeAreaView style={styles.container} edges={['top', 'bottom']}>
 			{/* Sticky Header */}
 			<BlurView intensity={80} style={styles.headerBlur}>
 				<View style={styles.header}>

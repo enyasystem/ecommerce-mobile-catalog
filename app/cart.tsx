@@ -6,9 +6,9 @@ import {
 	ScrollView,
 	TouchableOpacity,
 	Image,
-	SafeAreaView,
 	FlatList,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSelector, useDispatch } from 'react-redux';
@@ -44,7 +44,7 @@ export default function CartScreen() {
 	};
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<SafeAreaView style={styles.container} edges={['top', 'bottom']}>
 			{/* Header */}
 			<View style={styles.header}>
 				<View style={{ width: 40 }} />
