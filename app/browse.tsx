@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
 	View,
 	Text,
@@ -73,6 +73,47 @@ export default function BrowseScreen() {
 		brands: [],
 		priceRange: [50, 1200],
 	});
+
+	// Filter and sort products based on applied filters
+	const filteredProducts = useMemo(() => {
+		let result = [...products];
+
+		// Filter by price range
+		result = result.filter((p) => {
+			const price = p.price;
+			return price >= appliedFilters.priceRange[0] && price <= appliedFilters.priceRange[1];
+		});
+
+		// Filter by search text
+		if (searchText.trim()) {
+			const query = searchText.toLowerCase();
+			result = result.filter((p) =>
+				p.name.toLowerCase().includes(query)
+			);
+		}
+
+		// Sort products
+		switch (appliedFilters.sortBy) {
+			case 'popularity':
+				// Keep default order (already popular items first)
+				break;
+			case 'newest':
+				// Sort with newest (isNew) first
+				result.sort((a, b) => {
+					if (a.isNew === b.isNew) return 0;
+					return a.isNew ? -1 : 1;
+				});
+				break;
+			case 'priceLowHigh':
+				result.sort((a, b) => a.price - b.price);
+				break;
+			case 'priceHighLow':
+				result.sort((a, b) => b.price - a.price);
+				break;
+		}
+
+		return result;
+	}, [appliedFilters, searchText]);
 
 	const renderProductCard = ({ item }: { item: (typeof products)[0] }) => (
 		<TouchableOpacity
@@ -201,13 +242,49 @@ export default function BrowseScreen() {
 					))}
 				</ScrollView>
 
+				{/* Results Count */}
+				<View style={styles.resultsHeader}>
+					<Text style={styles.resultsText}>
+						Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
+					</Text>
+					{(appliedFilters.priceRange[0] !== 50 || appliedFilters.priceRange[1] !== 1200 || appliedFilters.sortBy !== 'popularity') && (
+						<TouchableOpacity
+							onPress={() => {
+								setAppliedFilters({
+									categories: ['All'],
+									sortBy: 'popularity',
+									brands: [],
+									priceRange: [50, 1200],
+								});
+							}}
+						>
+							<Text style={styles.resetFiltersText}>Reset filters</Text>
+						</TouchableOpacity>
+					)}
+				</View>
+
 				{/* Products Grid */}
 				<View style={styles.productsGrid}>
-					{products.map((item) => (
-						<View key={item.id} style={styles.gridColumn}>
-							{renderProductCard({ item })}
+					{filteredProducts.length > 0 ? (
+						filteredProducts.map((item) => (
+							<View key={item.id} style={styles.gridColumn}>
+								{renderProductCard({ item })}
+							</View>
+						))
+					) : (
+						<View style={styles.emptyStateContainer}>
+							<MaterialCommunityIcons
+								name="magnify"
+								size={48}
+								color="rgba(255, 255, 255, 0.3)"
+								style={styles.emptyIcon}
+							/>
+							<Text style={styles.emptyText}>No products found</Text>
+							<Text style={styles.emptySubtext}>
+								Try adjusting your filters or search terms
+							</Text>
 						</View>
-					))}
+					)}
 				</View>
 
 				<View style={styles.spacer} />
@@ -479,5 +556,46 @@ const styles = StyleSheet.create({
 	},
 	spacer: {
 		height: 120,
+	},
+	emptyStateContainer: {
+		width: '100%',
+		paddingVertical: 60,
+		paddingHorizontal: 20,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	emptyIcon: {
+		marginBottom: 16,
+		opacity: 0.5,
+	},
+	emptyText: {
+		fontSize: 18,
+		fontWeight: '700',
+		color: '#fff',
+		marginBottom: 8,
+		textAlign: 'center',
+	},
+	emptySubtext: {
+		fontSize: 14,
+		color: 'rgba(255, 255, 255, 0.5)',
+		textAlign: 'center',
+	},
+	resultsHeader: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		paddingHorizontal: 20,
+		paddingVertical: 12,
+		marginTop: 8,
+	},
+	resultsText: {
+		fontSize: 14,
+		fontWeight: '600',
+		color: 'rgba(255, 255, 255, 0.7)',
+	},
+	resetFiltersText: {
+		fontSize: 12,
+		fontWeight: '700',
+		color: '#2b6cee',
 	},
 });
