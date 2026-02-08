@@ -5,11 +5,16 @@ import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Provider } from 'react-redux';
+import { Provider, useSelector } from 'react-redux';
 import { store } from '../store/index';
 
 function CustomTabBarContent({ state, descriptors, navigation }: any) {
   const insets = useSafeAreaInsets();
+  const cartItems = useSelector((state: any) => state.cart.items);
+  const cartCount = cartItems.reduce(
+    (total: number, item: any) => total + item.quantity,
+    0
+  );
 
   return (
     <View style={[styles.tabBarContainer, { paddingBottom: insets.bottom + 8 }]}>
@@ -77,11 +82,18 @@ function CustomTabBarContent({ state, descriptors, navigation }: any) {
             }}
             style={styles.cartButton}
           >
-                <MaterialCommunityIcons
-                  name="shopping"
-                  size={24}
-                  color="#fff"
-                />
+            <MaterialCommunityIcons
+              name="shopping"
+              size={24}
+              color="#fff"
+            />
+            {cartCount > 0 && (
+              <View style={styles.cartBadge}>
+                <Text style={styles.cartBadgeText}>
+                  {cartCount > 9 ? '9+' : cartCount}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
 
@@ -312,6 +324,25 @@ const styles = StyleSheet.create<Record<string, any>>({
     borderColor: 'rgba(255,255,255,0.04)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#ef4444',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#050505',
+  },
+  cartBadgeText: {
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
+    textAlign: 'center',
   },
 
   tabBarBlur: {
