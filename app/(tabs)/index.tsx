@@ -18,7 +18,8 @@ import { addToCart } from '../../features/cart/cartSlice';
 import { toggleFavorite, selectIsFavorited, selectFavoritedIds } from '../../features/favorites/favoritesSlice';
 import { getOptimizedImageSource } from '../../utils/imageOptimization';
 import { createBounceAnimation, createFadeAnimation } from '../../utils/animations';
-import { createPulseAnimation, createSlideFromSideAnimation, createFloatingAnimation, createShimmerAnimation, createMarqueeAnimation } from '../../utils/advancedAnimations';
+import { createPulseAnimation, createSlideFromSideAnimation, createFloatingAnimation, createShimmerAnimation } from '../../utils/advancedAnimations';
+import Marquee from '../../components/common/Marquee';
 
 const CATEGORIES = ['All', 'electronics', "men's clothing", "women's clothing", 'jewelery'];
 const BRANDS = [
@@ -168,20 +169,7 @@ export default function HomeScreen() {
 		return favoriteBounceAnimations[productId];
 	};
 
-	// Helper to create marquee animations for product cards
-	const [productMarqueeAnimations, setProductMarqueeAnimations] = useState<{ [key: string]: any }>({});
-	const getProductMarqueeAnimation = (productId: string) => {
-		if (!productMarqueeAnimations[productId]) {
-			const newAnim = createMarqueeAnimation(3000);
-			newAnim.startMarquee();
-			setProductMarqueeAnimations(prev => ({
-				...prev,
-				[productId]: newAnim
-			}));
-			return newAnim;
-		}
-		return productMarqueeAnimations[productId];
-	};
+	// marquee is now handled by the Marquee component
 
 	useEffect(() => {
 		const tick = () => {
@@ -257,23 +245,23 @@ export default function HomeScreen() {
 						key={cat}
 						style={categoryAnimations[index]?.animatedStyle || {}}
 					>
-						<TouchableOpacity
-							style={[
-								styles.categoryBtn,
-								selectedCategory === cat && styles.categoryBtnActive,
-							]}
-							onPress={() => setSelectedCategory(cat)}
-						>
-							<Text
-								numberOfLines={1}
-								style={[
-									styles.categoryText,
-									selectedCategory === cat && styles.categoryTextActive,
-								]}
-							>
-								{cat}
-							</Text>
-						</TouchableOpacity>
+												<TouchableOpacity
+														style={[
+																styles.categoryBtn,
+																selectedCategory === cat && styles.categoryBtnActive,
+														]}
+														onPress={() => setSelectedCategory(cat)}
+												>
+														<Text
+																numberOfLines={1}
+																style={[
+																		styles.categoryText,
+																		selectedCategory === cat && styles.categoryTextActive,
+																]}
+														>
+																{cat}
+														</Text>
+												</TouchableOpacity>
 					</Animated.View>
 				))}
 			</ScrollView>
@@ -306,7 +294,9 @@ export default function HomeScreen() {
 
 			{/* New Arrivals Carousel */}
 		<View style={styles.sectionHeader}>
-			<Text style={styles.sectionTitle}>New Arrivals</Text>
+			<Marquee style={{ maxWidth: 220 }} duration={2500}>
+			  <Text style={styles.sectionTitle}>New Arrivals</Text>
+			</Marquee>
 			<TouchableOpacity>
 				<Text style={styles.viewAllBtn}>View All</Text>
 			</TouchableOpacity>
@@ -336,14 +326,12 @@ export default function HomeScreen() {
 				) : (
 					allProducts.slice(0, 8).map((product, carIndex) => {
 						const favAnim = getFavoriteBounceAnimation(product.id);
-						const marqueeAnim = getProductMarqueeAnimation(product.id);
 						return (
 							<Animated.View
 								key={product.id}
 								style={[
 									styles.productCarouselCard,
-									carouselAnimations[carIndex]?.animatedStyle || {},
-									marqueeAnim?.animatedStyle || {}
+									carouselAnimations[carIndex]?.animatedStyle || {}
 								]}
 							>
 								<TouchableOpacity
@@ -397,7 +385,7 @@ export default function HomeScreen() {
 										style={styles.productImage}
 									/>
 								</TouchableOpacity>
-								<Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
+																<Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
 								<View style={styles.productFooter}>
 									<View style={styles.priceWrap}>
 										{product.originalPrice && (
@@ -447,7 +435,9 @@ export default function HomeScreen() {
 			{/* Brands Section */}
 			<View style={styles.brandsSection}>
 				<View style={styles.sectionHeader}>
-					<Text style={styles.sectionTitle}>Top Brands</Text>
+					<Marquee style={{ maxWidth: 220 }} duration={2500}>
+						<Text style={styles.sectionTitle}>Top Brands</Text>
+					</Marquee>
 					<TouchableOpacity>
 						<Text style={styles.viewAllBtn}>View All</Text>
 					</TouchableOpacity>
@@ -470,7 +460,9 @@ export default function HomeScreen() {
 
 			{/* Featured Products Section */}
 		<View style={styles.sectionHeader}>
-			<Text style={styles.sectionTitle}>Featured Products</Text>
+			<Marquee style={{ maxWidth: 220 }} duration={2500}>
+				<Text style={styles.sectionTitle}>Featured Products</Text>
+			</Marquee>
 			<TouchableOpacity>
 				<Text style={styles.viewAllBtn}>View All</Text>
 			</TouchableOpacity>
@@ -571,7 +563,9 @@ export default function HomeScreen() {
 
 			{/* Electronics Section */}
 			<View style={styles.sectionHeader}>
-				<Text style={styles.sectionTitle}>Electronics</Text>
+				<Marquee style={{ maxWidth: 220 }} duration={2500}>
+					<Text style={styles.sectionTitle}>Electronics</Text>
+				</Marquee>
 				<TouchableOpacity>
 					<Text style={styles.viewAllBtn}>View All</Text>
 				</TouchableOpacity>
@@ -600,14 +594,10 @@ export default function HomeScreen() {
 					))
 				) : (
 					getProductsByCategory('electronics').map((product) => {
-						const marqueeAnim = getProductMarqueeAnimation(product.id);
 						return (
 							<Animated.View
 								key={product.id}
-								style={[
-									styles.productCarouselCard,
-									marqueeAnim?.animatedStyle || {}
-								]}
+								style={styles.productCarouselCard}
 							>
 								<TouchableOpacity
 									activeOpacity={0.92}
@@ -693,7 +683,9 @@ export default function HomeScreen() {
 
 			{/* Men's Clothing Section */}
 			<View style={styles.sectionHeader}>
-				<Text style={styles.sectionTitle}>Men's Clothing</Text>
+				<Marquee style={{ maxWidth: 220 }} duration={2500}>
+					<Text style={styles.sectionTitle}>Men's Clothing</Text>
+				</Marquee>
 				<TouchableOpacity>
 					<Text style={styles.viewAllBtn}>View All</Text>
 				</TouchableOpacity>
@@ -805,7 +797,9 @@ export default function HomeScreen() {
 
 			{/* Women's Clothing Section */}
 			<View style={styles.sectionHeader}>
-				<Text style={styles.sectionTitle}>Women's Clothing</Text>
+				<Marquee style={{ maxWidth: 220 }} duration={2500}>
+					<Text style={styles.sectionTitle}>Women's Clothing</Text>
+				</Marquee>
 				<TouchableOpacity>
 					<Text style={styles.viewAllBtn}>View All</Text>
 				</TouchableOpacity>
@@ -834,14 +828,10 @@ export default function HomeScreen() {
 					))
 				) : (
 					getProductsByCategory("women's clothing").map((product) => {
-						const marqueeAnim = getProductMarqueeAnimation(product.id);
 						return (
 							<Animated.View
 								key={product.id}
-								style={[
-									styles.productCarouselCard,
-									marqueeAnim?.animatedStyle || {}
-								]}
+								style={styles.productCarouselCard}
 							>
 								<TouchableOpacity
 									style={{ flex: 1 }}
@@ -891,7 +881,7 @@ export default function HomeScreen() {
 									style={styles.productImage}
 								/>
 							</View>
-							<Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
+														<Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
 							<View style={styles.productFooter}>
 								<View style={styles.priceWrap}>
 									{product.originalPrice && (
@@ -927,7 +917,9 @@ export default function HomeScreen() {
 
 			{/* Jewelry Section */}
 			<View style={styles.sectionHeader}>
-				<Text style={styles.sectionTitle}>Jewelry</Text>
+				<Marquee style={{ maxWidth: 220 }} duration={2500}>
+					<Text style={styles.sectionTitle}>Jewelry</Text>
+				</Marquee>
 				<TouchableOpacity>
 					<Text style={styles.viewAllBtn}>View All</Text>
 				</TouchableOpacity>

@@ -413,41 +413,4 @@ export const createShakeAnimation = (
  * Marquee animation - scrolling text effect
  * Creates a continuous horizontal scrolling animation like a news ticker
  */
-export const createMarqueeAnimation = (duration: number = 3000) => {
-  const marqueeValue = new Animated.Value(0);
-
-  const startMarquee = () => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(marqueeValue, {
-          toValue: 1,
-          duration,
-          easing: Easing.linear,
-          useNativeDriver: true,
-        }),
-        Animated.timing(marqueeValue, {
-          toValue: 0,
-          duration: 0,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  };
-
-  const stop = () => {
-    marqueeValue.resetAnimation();
-  };
-
-  const translateX = marqueeValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: [100, -100],
-  });
-
-  return {
-    startMarquee,
-    stop,
-    animatedStyle: {
-      transform: [{ translateX }],
-    },
-  };
-};
+// Note: Marquee behavior moved to a dedicated component `components/common/Marquee.tsx`.
