@@ -13,6 +13,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import FilterModal from '../components/FilterModal';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 const cardWidth = width / 2 - 16;
@@ -59,6 +60,7 @@ const products = [
 ];
 
 export default function BrowseScreen() {
+	const router = useRouter();
 	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [searchText, setSearchText] = useState('');
 	const [showFilter, setShowFilter] = useState(false);
@@ -119,6 +121,18 @@ export default function BrowseScreen() {
 		<TouchableOpacity
 			style={styles.productCard}
 			activeOpacity={0.8}
+			onPress={() => {
+				router.push({
+					pathname: '/product/[id]',
+					params: {
+						id: item.id,
+						name: item.name,
+						price: item.price,
+						image: item.image,
+						originalPrice: item.originalPrice || '',
+					},
+				});
+			}}
 		>
 			{/* Product Image */}
 			<View style={styles.imageContainer}>
