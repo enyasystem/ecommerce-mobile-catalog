@@ -125,7 +125,7 @@ export const createBounceAnimation = () => {
 		Animated.sequence([
 			Animated.timing(bounceValue, {
 				toValue: -8,
-				duration: 150,
+				duration: 950,
 				easing: Easing.ease,
 				useNativeDriver: true,
 			}),

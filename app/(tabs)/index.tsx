@@ -7,6 +7,7 @@ import {
 	TouchableOpacity,
 	TextInput,
 	Image,
+	Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -16,6 +17,7 @@ import { useGetProductsQuery } from '../../features/products/productsAPI';
 import { addToCart } from '../../features/cart/cartSlice';
 import { toggleFavorite, selectIsFavorited, selectFavoritedIds } from '../../features/favorites/favoritesSlice';
 import { getOptimizedImageSource } from '../../utils/imageOptimization';
+import { createBounceAnimation } from '../../utils/animations';
 
 const CATEGORIES = ['All', 'electronics', "men's clothing", "women's clothing", 'jewelery'];
 const BRANDS = [
@@ -33,6 +35,9 @@ export default function HomeScreen() {
 	const router = useRouter();
 	const dispatch = useDispatch();
 	const favoriteIds = useSelector(selectFavoritedIds);
+
+	// Logo bounce animation
+	const logoAnimation = createBounceAnimation();
 
 	// Fetch products from FakeStore API
 	const { data: apiProducts = [], isLoading } = useGetProductsQuery();
@@ -71,6 +76,11 @@ export default function HomeScreen() {
 	const FLASH_SALE_END = new Date(Date.now() + (4 * 3600 + 28 * 60 + 12) * 1000);
 	const [remaining, setRemaining] = useState(() => Math.max(0, Math.floor((FLASH_SALE_END.getTime() - Date.now()) / 1000)));
 
+	// Logo bounce animation on component mount
+	useEffect(() => {
+		logoAnimation.bounce();
+	}, []);
+
 	useEffect(() => {
 		const tick = () => {
 			const secs = Math.max(0, Math.floor((FLASH_SALE_END.getTime() - Date.now()) / 1000));
@@ -94,10 +104,12 @@ export default function HomeScreen() {
 			{/* Header */}
 			<View style={styles.header}>
 				<View style={styles.headerTop}>
-					<View style={styles.logo}>
-					<MaterialCommunityIcons name="cube" size={28} color="#2b6cee" />
-						<Text style={styles.logoText}>NexusStore</Text>
-					</View>
+					<Animated.View style={logoAnimation.animatedStyle}>
+						<View style={styles.logo}>
+							<MaterialCommunityIcons name="cube" size={28} color="#2b6cee" />
+							<Text style={styles.logoText}>NexusStore</Text>
+						</View>
+					</Animated.View>
 					<TouchableOpacity style={styles.notificationBtn}>
 						<MaterialCommunityIcons name="bell" size={20} color="rgba(255, 255, 255, 0.9)" />
 						<View style={styles.notificationBadge} />
