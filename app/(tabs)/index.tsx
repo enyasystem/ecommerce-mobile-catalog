@@ -175,6 +175,88 @@ export default function HomeScreen() {
 				</View>
 			</View>
 
+			{/* New Arrivals Carousel */}
+			<View style={styles.sectionHeader}>
+				<Text style={styles.sectionTitle}>New Arrivals</Text>
+				<TouchableOpacity>
+					<Text style={styles.viewAllBtn}>View All</Text>
+				</TouchableOpacity>
+			</View>
+
+			<ScrollView
+				horizontal
+				showsHorizontalScrollIndicator={false}
+				decelerationRate="fast"
+				snapToAlignment="center"
+				scrollEventThrottle={16}
+				contentContainerStyle={styles.carouselContent}
+			>
+				{isLoading ? (
+					Array.from({ length: 3 }).map((_, index) => (
+						<View key={`skeleton-arrivals-${index}`} style={styles.productCarouselCard}>
+							<View style={[styles.productImageContainer, styles.skeletonImage]} />
+							<View style={styles.skeletonContainer}>
+								<View style={[styles.skeletonBar, { width: '75%', height: 16 }]} />
+								<View style={[styles.skeletonBar, { width: '50%', height: 12, marginTop: 8 }]} />
+								<View style={styles.skeletonFooter}>
+									<View style={[styles.skeletonBar, { width: 40, height: 20 }]} />
+									<View style={[styles.skeletonBar, { width: 32, height: 32, borderRadius: 16 }]} />
+								</View>
+							</View>
+						</View>
+					))
+				) : (
+					allProducts.slice(0, 8).map((product) => (
+						<TouchableOpacity
+							key={product.id}
+							style={styles.productCarouselCard}
+							activeOpacity={0.92}
+							onPress={() => {
+								router.push({
+									pathname: '/product/[id]',
+									params: {
+										id: product.id,
+										name: product.name,
+										price: product.price,
+										image: product.image,
+										originalPrice: product.originalPrice || '',
+									},
+								});
+							}}
+						>
+							<View style={styles.productImageContainer}>
+								{product.isNew && (
+									<View style={styles.newBadge}>
+										<Text style={styles.newBadgeText}>NEW</Text>
+									</View>
+								)}
+								<TouchableOpacity style={styles.favoriteBtn}>
+									<MaterialCommunityIcons name="heart-outline" size={18} color="#fff" />
+								</TouchableOpacity>
+								<Image
+									source={{ uri: product.image }}
+									style={styles.productImage}
+								/>
+							</View>
+							<Text style={styles.productName} numberOfLines={2}>{product.name}</Text>
+							<View style={styles.productFooter}>
+								<View style={styles.priceWrap}>
+									{product.originalPrice && (
+										<Text style={styles.originalPrice}>
+											${product.originalPrice}
+										</Text>
+									)}
+									<Text style={styles.productPrice}>${product.price}</Text>
+								</View>
+								<TouchableOpacity style={styles.addBtn}>
+									<MaterialCommunityIcons name="plus" size={18} color="#fff" />
+								</TouchableOpacity>
+							</View>
+						</TouchableOpacity>
+					))
+				)}
+			</ScrollView>
+
 			{/* Flash Sale */}
 			<View style={styles.flashSale}>
 				<View style={styles.flashSaleContent}>
@@ -786,9 +868,9 @@ const styles = StyleSheet.create({
 	},
 	heroTitle: {
 		color: '#fff',
-		fontSize: 28,
+		fontSize: 24,
 		fontWeight: '900',
-		lineHeight: 32,
+		lineHeight: 28,
 		marginBottom: 12,
 		letterSpacing: -0.5,
 	},
