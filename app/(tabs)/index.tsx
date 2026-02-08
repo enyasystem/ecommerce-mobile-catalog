@@ -326,6 +326,8 @@ const styles = StyleSheet.create({
 		backgroundColor: 'rgba(255, 255, 255, 0.05)',
 		borderWidth: 1,
 		borderColor: 'rgba(255, 255, 255, 0.1)',
+		minHeight: 40,
+		justifyContent: 'center',
 	},
 	categoryBtnActive: {
 		backgroundColor: '#2b6cee',

@@ -85,31 +85,29 @@ export default function BrowseScreen() {
 					source={{ uri: item.image }}
 					style={styles.productImage}
 				/>
-				<View style={styles.imageInnerBorder} />
 			</View>
 
 			{/* Product Info */}
-			<View style={styles.productInfo}>
-				<Text style={styles.productName} numberOfLines={2}>
-					{item.name}
-				</Text>
-				<View style={styles.priceRow}>
-					<View>
-						{item.originalPrice && (
-							<Text style={styles.originalPrice}>
-								${item.originalPrice}
-							</Text>
-						)}
-						<Text style={styles.price}>${item.price}</Text>
-					</View>
-					<TouchableOpacity style={styles.addButton}>
+			<Text style={styles.productName} numberOfLines={2}>
+				{item.name}
+			</Text>
+			<View style={styles.productFooter}>
+				<View>
+					{item.originalPrice && (
+						<Text style={styles.originalPrice}>
+							${item.originalPrice}
+						</Text>
+					)}
+					<Text style={styles.price}>${item.price}</Text>
+				</View>
+				<TouchableOpacity style={styles.addButton}>
 						<MaterialCommunityIcons
 							name="plus"
 							size={18}
 							color="#fff"
 						/>
 					</TouchableOpacity>
-				</View>
+
 			</View>
 		</TouchableOpacity>
 	);
@@ -172,20 +170,15 @@ export default function BrowseScreen() {
 					<TouchableOpacity
 						key={category}
 						style={[
-							styles.categoryButton,
-							selectedCategory === category
-								? styles.categoryButtonActive
-								: styles.categoryButtonInactive,
-							{ marginRight: 12 },
+							styles.categoryBtn,
+							selectedCategory === category && styles.categoryBtnActive,
 						]}
 						onPress={() => setSelectedCategory(category)}
 					>
 						<Text
 							style={[
 								styles.categoryText,
-								selectedCategory === category
-									? styles.categoryTextActive
-									: styles.categoryTextInactive,
+								selectedCategory === category && styles.categoryTextActive,
 							]}
 						>
 							{category}
@@ -266,60 +259,60 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		paddingHorizontal: 16,
-		height: 48,
-		borderRadius: 24,
-		backgroundColor: 'rgba(255,255,255,0.08)',
-		borderWidth: 1,
-		borderColor: 'rgba(255,255,255,0.15)',
-	},
-	searchInput: {
-		flex: 1,
-		marginLeft: 12,
-		color: '#fff',
-		fontSize: 14,
-		fontWeight: '500',
-	},
-	micButton: {
-		backgroundColor: 'rgba(255,255,255,0.1)',
-		padding: 6,
-		borderRadius: 12,
-		marginLeft: 8,
-	},
-	categoriesScroll: {
-		paddingVertical: 16,
-		paddingHorizontal: 20,
-	},
-	categoriesContent: {
-		paddingRight: 20,
-	},
-	categoryButton: {
-		paddingHorizontal: 20,
-		paddingVertical: 10,
-		borderRadius: 20,
-		borderWidth: 0,
-	},
-	categoryButtonActive: {
-		backgroundColor: '#2b6cee',
-		shadowColor: '#2b6cee',
-		shadowOpacity: 0.25,
-		shadowRadius: 8,
-		shadowOffset: { width: 0, height: 4 },
-		elevation: 6,
-	},
-	categoryButtonInactive: {
-		backgroundColor: 'rgba(255,255,255,0.08)',
+		height: 56,
+		borderRadius: 28,
+		backgroundColor: 'rgba(0,0,0,0.3)',
 		borderWidth: 1,
 		borderColor: 'rgba(255,255,255,0.1)',
 	},
+	searchInput: {
+		flex: 1,
+		marginLeft: 14,
+		color: '#fff',
+		fontSize: 15,
+		fontWeight: '500',
+	},
+	micButton: {
+		backgroundColor: 'rgba(255,255,255,0.15)',
+		padding: 10,
+		borderRadius: 14,
+		marginLeft: 8,
+	},
+	categoriesScroll: {
+		marginTop: 16,
+		marginBottom: 12,
+	},
+	categoriesContent: {
+		paddingHorizontal: 20,
+		gap: 12,
+	},
+	categoryBtn: {
+		paddingHorizontal: 20,
+		paddingVertical: 10,
+		borderRadius: 20,
+		backgroundColor: 'rgba(255, 255, 255, 0.05)',
+		borderWidth: 1,
+		borderColor: 'rgba(255, 255, 255, 0.1)',
+		minHeight: 40,
+		justifyContent: 'center',
+	},
+	categoryBtnActive: {
+		backgroundColor: '#2b6cee',
+		borderColor: '#2b6cee',
+		shadowColor: '#2b6cee',
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.25,
+		shadowRadius: 8,
+		elevation: 8,
+	},
 	categoryText: {
-		fontSize: 14,
+		color: 'rgba(255, 255, 255, 0.6)',
+		fontSize: 13,
 		fontWeight: '600',
 	},
 	categoryTextActive: {
 		color: '#fff',
-	},
-	categoryTextInactive: {
-		color: 'rgba(255,255,255,0.8)',
+		fontWeight: '700',
 	},
 	productsGrid: {
 		paddingHorizontal: 16,
@@ -333,96 +326,97 @@ const styles = StyleSheet.create({
 	},
 	productCard: {
 		width: cardWidth,
-		borderRadius: 20,
-		overflow: 'hidden',
 		backgroundColor: '#111318',
+		borderRadius: 24,
+		padding: 12,
 		borderWidth: 1,
-		borderColor: 'rgba(255,255,255,0.05)',
+		borderColor: 'rgba(255, 255, 255, 0.08)',
+		overflow: 'hidden',
+		position: 'relative',
+		paddingBottom: 20,
 	},
 	imageContainer: {
 		width: '100%',
 		aspectRatio: 4 / 5,
-		backgroundColor: 'rgba(0,0,0,0.2)',
+		backgroundColor: 'rgba(0, 0, 0, 0.2)',
 		position: 'relative',
 		marginBottom: 12,
+		overflow: 'hidden',
+		borderWidth: 1,
+		borderColor: 'rgba(255, 255, 255, 0.1)',
+		borderRadius: 16,
 	},
 	productImage: {
 		width: '100%',
 		height: '100%',
 		resizeMode: 'cover',
 	},
-	imageInnerBorder: {
-		position: 'absolute',
-		inset: 0,
-		borderWidth: 1,
-		borderColor: 'rgba(255,255,255,0.1)',
-		borderRadius: 12,
-	},
 	newBadge: {
 		position: 'absolute',
 		top: 8,
 		left: 8,
-		backgroundColor: 'rgba(255,255,255,0.1)',
+		backgroundColor: 'rgba(255, 255, 255, 0.1)',
 		paddingHorizontal: 8,
 		paddingVertical: 4,
 		borderRadius: 12,
-		borderWidth: 1,
-		borderColor: 'rgba(255,255,255,0.1)',
 		zIndex: 10,
+		borderWidth: 1,
+		borderColor: 'rgba(255, 255, 255, 0.1)',
 	},
 	newBadgeText: {
+		color: '#fff',
 		fontSize: 10,
 		fontWeight: '700',
-		color: '#fff',
+		letterSpacing: 0.2,
 	},
 	favoriteButton: {
 		position: 'absolute',
 		top: 8,
 		right: 8,
-		zIndex: 10,
-		backgroundColor: 'rgba(0,0,0,0.4)',
-		borderRadius: 20,
-		padding: 6,
-	},
-	productInfo: {
-		paddingHorizontal: 12,
-		paddingBottom: 12,
-	},
-	productName: {
-		fontSize: 14,
-		fontWeight: '600',
-		color: '#fff',
-		lineHeight: 18,
-		marginBottom: 8,
-	},
-	priceRow: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'flex-end',
-		marginTop: 8,
-	},
-	originalPrice: {
-		fontSize: 12,
-		color: 'rgba(255,255,255,0.4)',
-		textDecorationLine: 'line-through',
-	},
-	price: {
-		fontSize: 16,
-		fontWeight: '700',
-		color: '#fff',
-	},
-	addButton: {
 		width: 32,
 		height: 32,
 		borderRadius: 16,
-		backgroundColor: '#2b6cee',
-		justifyContent: 'center',
+		backgroundColor: 'rgba(0, 0, 0, 0.4)',
 		alignItems: 'center',
+		justifyContent: 'center',
+		zIndex: 10,
+	},
+	productName: {
+		color: '#fff',
+		fontSize: 13,
+		fontWeight: '600',
+		marginBottom: 8,
+		lineHeight: 16,
+	},
+	productFooter: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'flex-end',
+	},
+	originalPrice: {
+		color: 'rgba(255, 255, 255, 0.4)',
+		fontSize: 11,
+		textDecorationLine: 'line-through',
+		marginBottom: 2,
+	},
+	price: {
+		color: '#fff',
+		fontSize: 16,
+		fontWeight: '700',
+		letterSpacing: -0.3,
+	},
+	addButton: {
+		width: 40,
+		height: 40,
+		borderRadius: 20,
+		backgroundColor: '#2b6cee',
+		alignItems: 'center',
+		justifyContent: 'center',
 		shadowColor: '#2b6cee',
-		shadowOpacity: 0.3,
-		shadowRadius: 8,
-		shadowOffset: { width: 0, height: 4 },
-		elevation: 6,
+		shadowOffset: { width: 0, height: 6 },
+		shadowOpacity: 0.45,
+		shadowRadius: 12,
+		elevation: 8,
 	},
 	filterFab: {
 		position: 'absolute',
