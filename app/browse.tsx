@@ -548,7 +548,7 @@ const styles = StyleSheet.create({
 	},
 	filterFab: {
 		position: 'absolute',
-		bottom: 100,
+		bottom: 180,
 		right: 16,
 		backgroundColor: '#2b6cee',
 		paddingHorizontal: 16,
