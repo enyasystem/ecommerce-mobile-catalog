@@ -13,12 +13,13 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import FilterModal from '../components/FilterModal';
 import ProductSkeleton from '../components/products/ProductSkeleton';
 import { useRouter } from 'expo-router';
 import { useGetProductsQuery } from '../features/products/productsAPI';
 import { addToCart } from '../features/cart/cartSlice';
+import { toggleFavorite } from '../features/favorites/favoritesSlice';
 
 const { width } = Dimensions.get('window');
 const cardWidth = width / 2 - 16;
@@ -28,6 +29,9 @@ const categories = ['All', 'electronics', "men's clothing", "women's clothing", 
 export default function BrowseScreen() {
 	const router = useRouter();
 	const dispatch = useDispatch();
+	const favoriteIds = useSelector((state: any) =>
+		state.favorites.items.map((item: any) => item.id)
+	);
 	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [searchText, setSearchText] = useState('');
 	const [showFilter, setShowFilter] = useState(false);
@@ -138,11 +142,25 @@ export default function BrowseScreen() {
 						<Text style={styles.newBadgeText}>NEW</Text>
 					</View>
 				)}
-				<TouchableOpacity style={styles.favoriteButton}>
-					<MaterialCommunityIcons
-						name={item.isFavorite ? 'heart' : 'heart-outline'}
-						size={20}
-						color={item.isFavorite ? '#2b6cee' : 'rgba(255,255,255,0.7)'}
+			<TouchableOpacity
+				style={styles.favoriteButton}
+				onPress={() =>
+					dispatch(
+						toggleFavorite({
+							id: item.id,
+							name: item.name,
+							price: item.price,
+							image: item.image,
+							category: item.category,
+						})
+					)
+				}
+				activeOpacity={0.6}
+			>
+				<MaterialCommunityIcons
+					name={favoriteIds.includes(item.id) ? 'heart' : 'heart-outline'}
+					size={20}
+					color="#2b6cee"
 					/>
 				</TouchableOpacity>
 				<Image

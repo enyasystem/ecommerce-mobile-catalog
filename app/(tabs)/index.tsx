@@ -10,10 +10,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useGetProductsQuery } from '../../features/products/productsAPI';
 import { addToCart } from '../../features/cart/cartSlice';
+import { toggleFavorite, selectIsFavorited } from '../../features/favorites/favoritesSlice';
 
 const CATEGORIES = ['All', 'electronics', "men's clothing", "women's clothing", 'jewelery'];
 const BRANDS = [
@@ -30,6 +31,9 @@ export default function HomeScreen() {
 	const [searchText, setSearchText] = useState('');
 	const router = useRouter();
 	const dispatch = useDispatch();
+	const favoriteIds = useSelector((state: any) =>
+		state.favorites.items.map((item: any) => item.id)
+	);
 
 	// Fetch products from FakeStore API
 	const { data: apiProducts = [], isLoading } = useGetProductsQuery();
@@ -233,8 +237,26 @@ export default function HomeScreen() {
 										<Text style={styles.newBadgeText}>NEW</Text>
 									</View>
 								)}
-								<TouchableOpacity style={styles.favoriteBtn}>
-									<MaterialCommunityIcons name="heart-outline" size={18} color="#fff" />
+								<TouchableOpacity
+									style={styles.favoriteBtn}
+									onPress={() =>
+										dispatch(
+											toggleFavorite({
+												id: product.id,
+												name: product.name,
+												price: product.price,
+												image: product.image,
+												category: product.category,
+											})
+										)
+									}
+									activeOpacity={0.6}
+								>
+									<MaterialCommunityIcons
+										name={favoriteIds.includes(product.id) ? 'heart' : 'heart-outline'}
+										size={18}
+										color="#2b6cee"
+									/>
 								</TouchableOpacity>
 								<Image
 									source={{ uri: product.image }}
@@ -363,8 +385,26 @@ export default function HomeScreen() {
 										<Text style={styles.newBadgeText}>NEW</Text>
 									</View>
 								)}
-								<TouchableOpacity style={styles.favoriteBtn}>
-									<MaterialCommunityIcons name="heart-outline" size={18} color="#fff" />
+								<TouchableOpacity
+									style={styles.favoriteBtn}
+									onPress={() =>
+										dispatch(
+											toggleFavorite({
+												id: product.id,
+												name: product.name,
+												price: product.price,
+												image: product.image,
+												category: product.category,
+											})
+										)
+									}
+									activeOpacity={0.6}
+								>
+									<MaterialCommunityIcons
+										name={favoriteIds.includes(product.id) ? 'heart' : 'heart-outline'}
+										size={18}
+										color="#2b6cee"
+									/>
 								</TouchableOpacity>
 								<Image
 									source={{ uri: product.image }}
@@ -444,8 +484,26 @@ export default function HomeScreen() {
 										<Text style={styles.newBadgeText}>NEW</Text>
 									</View>
 								)}
-								<TouchableOpacity style={styles.favoriteBtn}>
-									<MaterialCommunityIcons name="heart-outline" size={18} color="#fff" />
+								<TouchableOpacity
+									style={styles.favoriteBtn}
+									onPress={() =>
+										dispatch(
+											toggleFavorite({
+												id: product.id,
+												name: product.name,
+												price: product.price,
+												image: product.image,
+												category: product.category,
+											})
+										)
+									}
+									activeOpacity={0.6}
+								>
+									<MaterialCommunityIcons
+										name={favoriteIds.includes(product.id) ? 'heart' : 'heart-outline'}
+										size={18}
+										color="#2b6cee"
+									/>
 								</TouchableOpacity>
 								<Image
 									source={{ uri: product.image }}
@@ -538,8 +596,26 @@ export default function HomeScreen() {
 										<Text style={styles.newBadgeText}>NEW</Text>
 									</View>
 								)}
-								<TouchableOpacity style={styles.favoriteBtn}>
-									<MaterialCommunityIcons name="heart-outline" size={18} color="#fff" />
+								<TouchableOpacity
+									style={styles.favoriteBtn}
+									onPress={() =>
+										dispatch(
+											toggleFavorite({
+												id: product.id,
+												name: product.name,
+												price: product.price,
+												image: product.image,
+												category: product.category,
+											})
+										)
+									}
+									activeOpacity={0.6}
+								>
+									<MaterialCommunityIcons
+										name={favoriteIds.includes(product.id) ? 'heart' : 'heart-outline'}
+										size={18}
+										color="#2b6cee"
+									/>
 								</TouchableOpacity>
 								<Image
 									source={{ uri: product.image }}
@@ -632,8 +708,26 @@ export default function HomeScreen() {
 										<Text style={styles.newBadgeText}>NEW</Text>
 									</View>
 								)}
-								<TouchableOpacity style={styles.favoriteBtn}>
-									<MaterialCommunityIcons name="heart-outline" size={18} color="#fff" />
+								<TouchableOpacity
+									style={styles.favoriteBtn}
+									onPress={() =>
+										dispatch(
+											toggleFavorite({
+												id: product.id,
+												name: product.name,
+												price: product.price,
+												image: product.image,
+												category: product.category,
+											})
+										)
+									}
+									activeOpacity={0.6}
+								>
+									<MaterialCommunityIcons
+										name={favoriteIds.includes(product.id) ? 'heart' : 'heart-outline'}
+										size={18}
+										color="#2b6cee"
+									/>
 								</TouchableOpacity>
 								<Image
 									source={{ uri: product.image }}
@@ -726,8 +820,26 @@ export default function HomeScreen() {
 										<Text style={styles.newBadgeText}>NEW</Text>
 									</View>
 								)}
-								<TouchableOpacity style={styles.favoriteBtn}>
-									<MaterialCommunityIcons name="heart-outline" size={18} color="#fff" />
+								<TouchableOpacity
+									style={styles.favoriteBtn}
+									onPress={() =>
+										dispatch(
+											toggleFavorite({
+												id: product.id,
+												name: product.name,
+												price: product.price,
+												image: product.image,
+												category: product.category,
+											})
+										)
+									}
+									activeOpacity={0.6}
+								>
+									<MaterialCommunityIcons
+										name={favoriteIds.includes(product.id) ? 'heart' : 'heart-outline'}
+										size={18}
+										color="#2b6cee"
+									/>
 								</TouchableOpacity>
 								<Image
 									source={{ uri: product.image }}

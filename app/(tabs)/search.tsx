@@ -15,9 +15,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useGetProductsQuery } from '../../features/products/productsAPI';
 import { addToCart } from '../../features/cart/cartSlice';
+import { toggleFavorite } from '../../features/favorites/favoritesSlice';
 import ProductSkeleton from '../../components/products/ProductSkeleton';
 
 const { width } = Dimensions.get('window');
@@ -33,6 +34,9 @@ const trendingTopics = [
 export default function SearchScreen() {
 	const router = useRouter();
 	const dispatch = useDispatch();
+	const favoriteIds = useSelector((state: any) =>
+		state.favorites.items.map((item: any) => item.id)
+	);
 	const [searchQuery, setSearchQuery] = useState('');
 	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -186,6 +190,27 @@ export default function SearchScreen() {
 							<Text style={styles.saleBadgeText}>SALE</Text>
 						</View>
 					)}
+					<TouchableOpacity
+						style={styles.favoriteButton}
+						onPress={() =>
+							dispatch(
+								toggleFavorite({
+									id: item.id,
+									name: item.name,
+									price: item.price,
+									image: item.image,
+									category: item.category,
+								})
+							)
+						}
+						activeOpacity={0.6}
+					>
+						<MaterialCommunityIcons
+							name={favoriteIds.includes(item.id) ? 'heart' : 'heart-outline'}
+							size={18}
+							color="#2b6cee"
+						/>
+					</TouchableOpacity>
 					<Image source={{ uri: item.image }} style={styles.productImage} />
 				</View>
 
@@ -544,6 +569,18 @@ const styles = StyleSheet.create({
 		width: '100%',
 		height: '100%',
 		resizeMode: 'cover',
+	},
+	favoriteButton: {
+		position: 'absolute',
+		top: 8,
+		right: 8,
+		width: 32,
+		height: 32,
+		borderRadius: 16,
+		backgroundColor: 'rgba(0, 0, 0, 0.4)',
+		justifyContent: 'center',
+		alignItems: 'center',
+		zIndex: 10,
 	},
 	newBadge: {
 		position: 'absolute',
