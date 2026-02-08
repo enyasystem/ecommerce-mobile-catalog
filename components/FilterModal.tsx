@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
 	Modal,
 	View,
@@ -9,8 +9,10 @@ import {
 	SafeAreaView,
 	PanResponder,
 	LayoutRectangle,
+	Animated,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { createSlideInAnimation } from '../utils/animations';
 
 interface FilterModalProps {
 	visible: boolean;
@@ -49,6 +51,14 @@ export default function FilterModal({ visible, onClose, onApply }: FilterModalPr
 	const THUMB_SIZE = 20;
 
 	const sliderTrackRef = useRef<LayoutRectangle | null>(null);
+	const slideAnimation = useRef(createSlideInAnimation(350)).current;
+
+	// Trigger animation when modal becomes visible
+	useEffect(() => {
+		if (visible) {
+			slideAnimation.slideIn();
+		}
+	}, [visible, slideAnimation]);
 
 	// Calculate position from price
 	const priceToPosition = (price: number): number => {
@@ -128,11 +138,18 @@ export default function FilterModal({ visible, onClose, onApply }: FilterModalPr
 	return (
 		<Modal
 			visible={visible}
-			animationType="slide"
-			transparent={false}
-			onRequestClose={onClose}
+			animationType="none"
+			transparent={true}
+			onRequestClose={() => {
+				slideAnimation.slideOut(onClose);
+			}}
 		>
-			<SafeAreaView style={styles.container}>
+			{/* Backdrop */}
+			<View style={styles.backdrop} />
+			
+			{/* Animated Modal Content */}
+			<Animated.View style={[styles.modalContent, slideAnimation.animatedStyle]}>
+				<SafeAreaView style={styles.container}>
 				{/* Header */}
 				<View style={styles.header}>
 					<Text style={styles.headerTitle}>Filter & Sort</Text>
@@ -335,11 +352,23 @@ export default function FilterModal({ visible, onClose, onApply }: FilterModalPr
 					</TouchableOpacity>
 				</View>
 			</SafeAreaView>
+			</Animated.View>
 		</Modal>
 	);
 }
 
 const styles = StyleSheet.create({
+	backdrop: {
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		right: 0,
+		bottom: 0,
+		backgroundColor: 'rgba(0, 0, 0, 0.5)',
+	},
+	modalContent: {
+		flex: 1,
+	},
 	container: {
 		flex: 1,
 		backgroundColor: '#050505',
