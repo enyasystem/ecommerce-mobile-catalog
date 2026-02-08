@@ -10,13 +10,16 @@ import {
 } from 'react-native';
 import { Image } from 'expo-image';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useDispatch } from 'react-redux';
 import PRODUCTS, { type Product } from '../data/products';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { addToCart } from '../../features/cart/cartSlice';
 
 export default function ProductDetailsScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
+  const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
   const id = params.id;
 
@@ -166,7 +169,20 @@ export default function ProductDetailsScreen() {
       {/* Fixed Bottom Area */}
       <View style={styles.bottomWrap} pointerEvents="box-none">
         <View style={[styles.buyGlow, { bottom: insets.bottom + 100 }]} />
-        <TouchableOpacity style={[styles.buyBtn, { bottom: insets.bottom + 104 }]}>
+        <TouchableOpacity
+          style={[styles.buyBtn, { bottom: insets.bottom + 104 }]}
+          onPress={() =>
+            dispatch(
+              addToCart({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.image,
+              })
+            )
+          }
+          activeOpacity={0.7}
+        >
           <MaterialCommunityIcons name="shopping" size={18} color="#fff" />
           <Text style={styles.buyText}>Buy Now</Text>
         </TouchableOpacity>

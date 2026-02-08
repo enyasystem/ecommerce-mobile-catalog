@@ -15,7 +15,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
+import { useDispatch } from 'react-redux';
 import { useGetProductsQuery } from '../../features/products/productsAPI';
+import { addToCart } from '../../features/cart/cartSlice';
 import ProductSkeleton from '../../components/products/ProductSkeleton';
 
 const { width } = Dimensions.get('window');
@@ -30,6 +32,7 @@ const trendingTopics = [
 
 export default function SearchScreen() {
 	const router = useRouter();
+	const dispatch = useDispatch();
 	const [searchQuery, setSearchQuery] = useState('');
 	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -204,7 +207,20 @@ export default function SearchScreen() {
 							) : null}
 							<Text style={styles.price}>${item.price}</Text>
 						</View>
-						<TouchableOpacity style={styles.addButton}>
+						<TouchableOpacity
+							style={styles.addButton}
+							onPress={() =>
+								dispatch(
+									addToCart({
+										id: item.id,
+										name: item.name,
+										price: item.price,
+										image: item.image,
+									})
+								)
+							}
+							activeOpacity={0.7}
+						>
 							<MaterialCommunityIcons
 								name="plus"
 								size={18}

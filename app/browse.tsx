@@ -13,10 +13,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import { useDispatch } from 'react-redux';
 import FilterModal from '../components/FilterModal';
 import ProductSkeleton from '../components/products/ProductSkeleton';
 import { useRouter } from 'expo-router';
 import { useGetProductsQuery } from '../features/products/productsAPI';
+import { addToCart } from '../features/cart/cartSlice';
 
 const { width } = Dimensions.get('window');
 const cardWidth = width / 2 - 16;
@@ -25,6 +27,7 @@ const categories = ['All', 'electronics', "men's clothing", "women's clothing", 
 
 export default function BrowseScreen() {
 	const router = useRouter();
+	const dispatch = useDispatch();
 	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [searchText, setSearchText] = useState('');
 	const [showFilter, setShowFilter] = useState(false);
@@ -161,13 +164,26 @@ export default function BrowseScreen() {
 					)}
 					<Text style={styles.price}>${item.price}</Text>
 				</View>
-				<TouchableOpacity style={styles.addButton}>
-						<MaterialCommunityIcons
-							name="plus"
-							size={18}
-							color="#fff"
-						/>
-					</TouchableOpacity>
+				<TouchableOpacity
+					style={styles.addButton}
+					onPress={() =>
+						dispatch(
+							addToCart({
+								id: item.id,
+								name: item.name,
+								price: item.price,
+								image: item.image,
+							})
+						)
+					}
+					activeOpacity={0.7}
+				>
+					<MaterialCommunityIcons
+						name="plus"
+						size={18}
+						color="#fff"
+					/>
+				</TouchableOpacity>
 
 			</View>
 		</TouchableOpacity>

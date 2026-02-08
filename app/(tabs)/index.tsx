@@ -10,8 +10,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useDispatch } from 'react-redux';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useGetProductsQuery } from '../../features/products/productsAPI';
+import { addToCart } from '../../features/cart/cartSlice';
 
 const CATEGORIES = ['All', 'electronics', "men's clothing", "women's clothing", 'jewelery'];
 const BRANDS = [
@@ -27,6 +29,7 @@ export default function HomeScreen() {
 	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [searchText, setSearchText] = useState('');
 	const router = useRouter();
+	const dispatch = useDispatch();
 
 	// Fetch products from FakeStore API
 	const { data: apiProducts = [], isLoading } = useGetProductsQuery();
@@ -248,7 +251,20 @@ export default function HomeScreen() {
 									)}
 									<Text style={styles.productPrice}>${product.price}</Text>
 								</View>
-								<TouchableOpacity style={styles.addBtn}>
+								<TouchableOpacity
+									style={styles.addBtn}
+									onPress={() =>
+										dispatch(
+											addToCart({
+												id: product.id,
+												name: product.name,
+												price: product.price,
+												image: product.image,
+											})
+										)
+									}
+									activeOpacity={0.7}
+								>
 									<MaterialCommunityIcons name="plus" size={18} color="#fff" />
 								</TouchableOpacity>
 							</View>
@@ -446,7 +462,20 @@ export default function HomeScreen() {
 									)}
 									<Text style={styles.productPrice}>${product.price}</Text>
 								</View>
-								<TouchableOpacity style={styles.addBtn}>
+								<TouchableOpacity
+									style={styles.addBtn}
+									onPress={() =>
+										dispatch(
+											addToCart({
+												id: product.id,
+												name: product.name,
+												price: product.price,
+												image: product.image,
+											})
+										)
+									}
+									activeOpacity={0.7}
+								>
 									<MaterialCommunityIcons name="plus" size={18} color="#fff" />
 								</TouchableOpacity>
 							</View>
@@ -527,7 +556,20 @@ export default function HomeScreen() {
 									)}
 									<Text style={styles.productPrice}>${product.price}</Text>
 								</View>
-								<TouchableOpacity style={styles.addBtn}>
+								<TouchableOpacity
+									style={styles.addBtn}
+									onPress={() =>
+										dispatch(
+											addToCart({
+												id: product.id,
+												name: product.name,
+												price: product.price,
+												image: product.image,
+											})
+										)
+									}
+									activeOpacity={0.7}
+								>
 									<MaterialCommunityIcons name="plus" size={18} color="#fff" />
 								</TouchableOpacity>
 							</View>
@@ -608,7 +650,20 @@ export default function HomeScreen() {
 									)}
 									<Text style={styles.productPrice}>${product.price}</Text>
 								</View>
-								<TouchableOpacity style={styles.addBtn}>
+								<TouchableOpacity
+									style={styles.addBtn}
+									onPress={() =>
+										dispatch(
+											addToCart({
+												id: product.id,
+												name: product.name,
+												price: product.price,
+												image: product.image,
+											})
+										)
+									}
+									activeOpacity={0.7}
+								>
 									<MaterialCommunityIcons name="plus" size={18} color="#fff" />
 								</TouchableOpacity>
 							</View>
@@ -689,7 +744,20 @@ export default function HomeScreen() {
 									)}
 									<Text style={styles.productPrice}>${product.price}</Text>
 								</View>
-								<TouchableOpacity style={styles.addBtn}>
+								<TouchableOpacity
+									style={styles.addBtn}
+									onPress={() =>
+										dispatch(
+											addToCart({
+												id: product.id,
+												name: product.name,
+												price: product.price,
+												image: product.image,
+											})
+										)
+									}
+									activeOpacity={0.7}
+								>
 									<MaterialCommunityIcons name="plus" size={18} color="#fff" />
 								</TouchableOpacity>
 							</View>
