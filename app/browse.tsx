@@ -9,6 +9,7 @@ import {
 	Image,
 	Dimensions,
 	SafeAreaView,
+	RefreshControl,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -64,6 +65,7 @@ export default function BrowseScreen() {
 	const [selectedCategory, setSelectedCategory] = useState('All');
 	const [searchText, setSearchText] = useState('');
 	const [showFilter, setShowFilter] = useState(false);
+	const [isRefreshing, setIsRefreshing] = useState(false);
 	const [appliedFilters, setAppliedFilters] = useState<{
 		categories: string[];
 		sortBy: string;
@@ -75,6 +77,21 @@ export default function BrowseScreen() {
 		brands: [],
 		priceRange: [50, 1200],
 	});
+
+	// Handle pull-to-refresh
+	const onRefresh = async () => {
+		setIsRefreshing(true);
+		try {
+			// Simulate API call with a 1 second delay
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+			// In a real app, you would fetch fresh product data here
+			console.log('Products refreshed');
+		} catch (error) {
+			console.error('Error refreshing products:', error);
+		} finally {
+			setIsRefreshing(false);
+		}
+	};
 
 	// Filter and sort products based on applied filters
 	const filteredProducts = useMemo(() => {
@@ -233,7 +250,19 @@ export default function BrowseScreen() {
 				</TouchableOpacity>
 			</View>
 
-			<ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+			<ScrollView 
+				style={styles.scrollContent} 
+				showsVerticalScrollIndicator={false}
+				refreshControl={
+					<RefreshControl
+						refreshing={isRefreshing}
+						onRefresh={onRefresh}
+						tintColor="#2badee"
+						titleColor="#2badee"
+						title="Pull to refresh"
+					/>
+				}
+			>
 				{/* Categories Scroll */}
 				<ScrollView
 					horizontal
