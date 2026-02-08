@@ -203,27 +203,34 @@ export default function BrowseScreen() {
 				</View>
 
 				{/* Search Bar */}
-				<BlurView intensity={40} style={styles.searchContainer}>
-					<MaterialCommunityIcons
-						name="magnify"
-						size={20}
-						color="rgba(255,255,255,0.5)"
-					/>
-					<TextInput
-						placeholder="Search for premium gear..."
-						placeholderTextColor="rgba(255,255,255,0.4)"
-						style={styles.searchInput}
-						value={searchText}
-						onChangeText={setSearchText}
-					/>
-					<TouchableOpacity style={styles.micButton}>
+				<TouchableOpacity
+					style={{ borderRadius: 16 }}
+					onPress={() => router.push('/(tabs)/search')}
+					activeOpacity={0.7}
+				>
+					<BlurView intensity={40} style={styles.searchContainer}>
 						<MaterialCommunityIcons
-							name="microphone"
-							size={18}
-							color="#fff"
+							name="magnify"
+							size={20}
+							color="rgba(255,255,255,0.5)"
 						/>
-					</TouchableOpacity>
-				</BlurView>
+						<TextInput
+							placeholder="Search for premium gear..."
+							placeholderTextColor="rgba(255,255,255,0.4)"
+							style={styles.searchInput}
+							value={searchText}
+							editable={false}
+							onChangeText={setSearchText}
+						/>
+						<TouchableOpacity style={styles.micButton} onPress={() => router.push('/(tabs)/search')}>
+							<MaterialCommunityIcons
+								name="microphone"
+								size={18}
+								color="#fff"
+							/>
+						</TouchableOpacity>
+					</BlurView>
+				</TouchableOpacity>
 			</View>
 
 			<ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
