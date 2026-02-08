@@ -61,7 +61,7 @@ export default function CartScreen() {
 					<Text style={styles.emptyText}>Your cart is empty</Text>
 					<TouchableOpacity
 						style={styles.browseBtn}
-						onPress={() => router.push('/(tabs)/search')}
+						onPress={() => router.push('/browse')}
 					>
 						<Text style={styles.browseBtnText}>Start Shopping</Text>
 					</TouchableOpacity>
