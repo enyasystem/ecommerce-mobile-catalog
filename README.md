@@ -510,12 +510,13 @@ This project is licensed under the MIT License.
 ## 👤 Author
 
 **Your Name**
-- GitHub: [@yourusername](https://github.com/enyasystem)
-- LinkedIn: [Your Name](https://linkedin.com/in/enyaelvis)
-- Portfolio: [yourportfolio.com](https://enyaelvis.vercel.app)
+- GitHub: [@enyasystem](https://github.com/enyasystem)
+- LinkedIn: [Enya Elvis](https://linkedin.com/in/enyaelvis)
+- Portfolio: [enyaelvis.vercel.app](https://enyaelvis.vercel.app)
 
 ## 🙏 Acknowledgments
 
+- ALX
 - Project Nexus - ProDev Frontend Program
 - Expo team for amazing tools
 - React Native community
@@ -523,7 +524,5 @@ This project is licensed under the MIT License.
 ---
 
 **Built with ❤️ using React Native + Expo**
-
-**Due Date**: February 8, 2026
 
 **Project Type**: Mobile Application (React Native)
